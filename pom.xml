@@ -11,7 +11,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <main.class>br.com.granzoto.higor.DriveQuickStart</main.class>
+        <main.class>br.com.granzoto.higor.Main</main.class>
     </properties>
 
     <dependencies>

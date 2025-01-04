@@ -14,13 +14,13 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-public class DriveQuickStart {
-    private static final String APPLICATION_NAME = "Compress Google Drive Videos";
+public class Main {
+    private static final String APPLICATION_NAME = "Compress My Google Drive Videos";
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     public static void main(String... args) throws IOException, GeneralSecurityException {       
-        DriveQuickStart.listFiles(null);
+        Main.listFiles(null);
     }
 
     public static void listFiles(String nextPageToken) throws IOException, GeneralSecurityException {
@@ -41,7 +41,9 @@ public class DriveQuickStart {
             System.out.println("No files found.");
         } else {            
             files.forEach(file -> {
-                System.out.println(file.getName()+" ("+FileUtils.byteCountToDisplaySize(BigInteger.valueOf(Long.valueOf(file.get("size").toString())))+")");                
+                System.out.println(file.getName()+" ("+FileUtils.byteCountToDisplaySize(BigInteger.valueOf(Long.valueOf(file.get("size").toString())))+")");
+                new VideoCompressor(service).compressVideo(file);
+                System.out.println("-------------------------------------------------\n");
             });
             //listFiles(result.getNextPageToken());
         }
