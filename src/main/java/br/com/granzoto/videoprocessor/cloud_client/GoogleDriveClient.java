@@ -107,14 +107,13 @@ public class GoogleDriveClient implements CloudClient {
             fileMetadata.setParents(Collections.singletonList(compressionFile.parentId()));
         }
 
-        com.google.api.services.drive.model.File uploadedFile;
         try {
-            uploadedFile = this.drive.files().create(fileMetadata,
+            this.drive.files().create(fileMetadata,
                     new com.google.api.client.http.FileContent("video/mp4", outputFile))
                     .setFields("id")
                     .setFields("parents")
                     .execute();
-            LOGGER.info("Uploaded file ID: " + uploadedFile.getId());
+            LOGGER.info("Uploaded successfuly finished");
         } catch (IOException e) {
             throw new CloudClientUploadException("Upload to Google Drive Failed", e);
         }
