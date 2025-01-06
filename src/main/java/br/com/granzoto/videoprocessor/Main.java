@@ -24,27 +24,34 @@ public class Main {
 
     private List<String> compressedFileNames = new ArrayList<>();
 
+    private CloudClient cloudClient;
+
+    private WorkflowTemplate workflow;
+
+    public Main(CloudClient cloudClient, WorkflowTemplate workflow) {
+        this.cloudClient = cloudClient;
+        this.workflow = workflow;
+    }
+
     public static void main(String... args) throws CloudClientListFilesException {
-        new Main().listFilesAndProcess(null);
+        CloudClient cloudClient = GoogleDriveClient.getInstance();
+        VideoCompressor compressor = FFmpegCompressorWithHost.getInstance();
+        WorkflowTemplate workflow = WorkflowForGoogleDrive.getInstance(compressor);
+        new Main(cloudClient, workflow).listFilesAndProcess(null);
     }
 
     public void listFilesAndProcess(String nextPageToken) throws CloudClientListFilesException {
 
-        CloudClient cloudClient = GoogleDriveClient.getInstance();
-        VideoCompressor compressor = new FFmpegCompressorWithHost();
-        WorkflowTemplate workflow = new WorkflowForGoogleDrive(compressor);
         List<VideoCompressionFile> cloudFiles = cloudClient.listFiles(nextPageToken);
 
         if (cloudFiles != null && !cloudFiles.isEmpty()) {
             cloudFiles.forEach(myFile -> {
-                // file.entrySet().forEach(e -> {
-                // System.out.println(e.getKey()+": "+e.getValue());
-                // });
                 LOGGER.info(myFile.name() + " (" + FileUtils.byteCountToDisplaySize(myFile.size()) + ")");
                 if (!compressedFileNames.contains(myFile.name())) {
                     try {
                         workflow.processVideo(myFile);
-                    } catch (WorkflowDownloadStepException | WorkflowCompressionStepException
+                    } catch (WorkflowDownloadStepException
+                            | WorkflowCompressionStepException
                             | WorkflowUploadStepException e) {
                         LOGGER.severe(e.getMessage());
                     }

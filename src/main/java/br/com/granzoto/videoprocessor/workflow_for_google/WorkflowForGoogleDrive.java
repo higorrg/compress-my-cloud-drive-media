@@ -16,7 +16,11 @@ public class WorkflowForGoogleDrive extends WorkflowTemplate {
 
     private final VideoCompressor compressor;
 
-    public WorkflowForGoogleDrive(VideoCompressor compressor) {
+    public static WorkflowTemplate getInstance(VideoCompressor compressor){
+        return new WorkflowForGoogleDrive(compressor);
+    }
+
+    private WorkflowForGoogleDrive(VideoCompressor compressor) {
         if (compressor == null) {
             throw new IllegalArgumentException("Compressor must not be null");
         }

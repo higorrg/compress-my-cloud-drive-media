@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -71,9 +69,9 @@ public class GoogleDriveClient implements CloudClient {
                     .setPageToken(page)
                     .execute()
                     .getFiles();
-            googledDriveFiles.forEach(f -> {
-                VideoCompressionFile file = VideoCompressionFileFactory.createFile(f);
-                result.add(file);
+            googledDriveFiles.forEach(googleFile -> {
+                VideoCompressionFile compressionFile = VideoCompressionFileFactory.createVideoCompressionFileFromGoogleFile(googleFile);
+                result.add(compressionFile);
             });
         } catch (IOException e) {
             throw new CloudClientListFilesException("Unable to get files from Google Drive", e);
@@ -84,7 +82,7 @@ public class GoogleDriveClient implements CloudClient {
     @Override
     public void downloadVideo(VideoCompressionFile compressionFile, File inputFile)
             throws CloudClientDownloadException {
-        LOGGER.info("Downloading : " + compressionFile.name());
+        LOGGER.info("Downloading file: " + compressionFile.name());
         if (!inputFile.exists()) {
             try (OutputStream outputStream = new FileOutputStream(inputFile)) {
                 this.drive.files().get(compressionFile.id()).executeMediaAndDownloadTo(outputStream);
@@ -99,21 +97,12 @@ public class GoogleDriveClient implements CloudClient {
 
     @Override
     public void uploadVideo(File outputFile, VideoCompressionFile compressionFile) throws CloudClientUploadException {
-        LOGGER.info("Uploading file name: " + outputFile.getName() + "; size: "
+        LOGGER.info("Uploading file: " + outputFile.getName() + "; size: "
                 + FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(outputFile)));
 
-        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-        fileMetadata.setName(outputFile.getName());
-        if (!Objects.isNull(compressionFile.parentId())) {
-            fileMetadata.setParents(Collections.singletonList(compressionFile.parentId()));
-        }
-
         try {
-            this.drive.files().create(fileMetadata,
-                new com.google.api.client.http.FileContent("video/mp4", outputFile))
-                .setFields("id")
-                .setFields("parents")
-                .execute();
+            var googleFile = VideoCompressionFileFactory.createGoogleFileFromVideoCompressionFile(compressionFile);
+            this.drive.files().update(compressionFile.id(), googleFile).execute();
             LOGGER.info("Uploaded successfuly finished");
         } catch (IOException e) {
             throw new CloudClientUploadException("Upload to Google Drive Failed", e);
