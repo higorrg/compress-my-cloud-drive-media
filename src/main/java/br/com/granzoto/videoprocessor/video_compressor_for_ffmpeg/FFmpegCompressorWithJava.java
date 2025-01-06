@@ -1,10 +1,12 @@
-package br.com.granzoto.videoprocessor.video_compressor;
+package br.com.granzoto.videoprocessor.video_compressor_for_ffmpeg;
 
 import java.util.logging.Logger;
 
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
+
+import br.com.granzoto.videoprocessor.video_compressor.VideoCompressor;
 
 public class FFmpegCompressorWithJava implements VideoCompressor {
 

@@ -1,8 +1,10 @@
-package br.com.granzoto.videoprocessor.video_compressor;
+package br.com.granzoto.videoprocessor.video_compressor_for_ffmpeg;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
+
+import br.com.granzoto.videoprocessor.video_compressor.VideoCompressor;
 
 public class FFmpegCompressorWithHost implements VideoCompressor {
 

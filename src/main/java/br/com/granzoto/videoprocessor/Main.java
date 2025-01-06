@@ -9,14 +9,14 @@ import org.apache.commons.io.FileUtils;
 import br.com.granzoto.videoprocessor.cloud_client.CloudClient;
 import br.com.granzoto.videoprocessor.cloud_client.CloudClientListFilesException;
 import br.com.granzoto.videoprocessor.cloud_client.GoogleDriveClient;
-import br.com.granzoto.videoprocessor.core.video_compressing.GoogleDriveVideoProcessor;
-import br.com.granzoto.videoprocessor.core.video_compressing.VideoProcessingCompressionStepException;
-import br.com.granzoto.videoprocessor.core.video_compressing.VideoProcessingDownloadStepException;
-import br.com.granzoto.videoprocessor.core.video_compressing.VideoProcessingTemplate;
-import br.com.granzoto.videoprocessor.core.video_compressing.VideoProcessingUploadStepException;
 import br.com.granzoto.videoprocessor.model.VideoCompressionFile;
-import br.com.granzoto.videoprocessor.video_compressor.FFmpegCompressorWithHost;
 import br.com.granzoto.videoprocessor.video_compressor.VideoCompressor;
+import br.com.granzoto.videoprocessor.video_compressor_for_ffmpeg.FFmpegCompressorWithHost;
+import br.com.granzoto.videoprocessor.workflow.WorkflowCompressionStepException;
+import br.com.granzoto.videoprocessor.workflow.WorkflowDownloadStepException;
+import br.com.granzoto.videoprocessor.workflow.WorkflowTemplate;
+import br.com.granzoto.videoprocessor.workflow.WorkflowUploadStepException;
+import br.com.granzoto.videoprocessor.workflow_for_google.WorkflowForGoogleDrive;
 
 public class Main {
 
@@ -32,7 +32,7 @@ public class Main {
 
         CloudClient cloudClient = GoogleDriveClient.getInstance();
         VideoCompressor compressor = new FFmpegCompressorWithHost();
-        VideoProcessingTemplate processor = new GoogleDriveVideoProcessor(compressor);
+        WorkflowTemplate workflow = new WorkflowForGoogleDrive(compressor);
         List<VideoCompressionFile> cloudFiles = cloudClient.listFiles(nextPageToken);
 
         if (cloudFiles != null && !cloudFiles.isEmpty()) {
@@ -43,9 +43,9 @@ public class Main {
                 LOGGER.info(myFile.name() + " (" + FileUtils.byteCountToDisplaySize(myFile.size()) + ")");
                 if (!compressedFileNames.contains(myFile.name())) {
                     try {
-                        processor.processVideo(myFile);
-                    } catch (VideoProcessingDownloadStepException | VideoProcessingCompressionStepException
-                            | VideoProcessingUploadStepException e) {
+                        workflow.processVideo(myFile);
+                    } catch (WorkflowDownloadStepException | WorkflowCompressionStepException
+                            | WorkflowUploadStepException e) {
                         LOGGER.severe(e.getMessage());
                     }
                     LOGGER.info("-------------------------------------------------\n");

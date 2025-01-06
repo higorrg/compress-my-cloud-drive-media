@@ -19,6 +19,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 
+import br.com.granzoto.videoprocessor.cloud_client_for_google.GoogleDriveAuth;
 import br.com.granzoto.videoprocessor.model.VideoCompressionFile;
 import br.com.granzoto.videoprocessor.model.VideoCompressionFileFactory;
 
@@ -109,10 +110,10 @@ public class GoogleDriveClient implements CloudClient {
 
         try {
             this.drive.files().create(fileMetadata,
-                    new com.google.api.client.http.FileContent("video/mp4", outputFile))
-                    .setFields("id")
-                    .setFields("parents")
-                    .execute();
+                new com.google.api.client.http.FileContent("video/mp4", outputFile))
+                .setFields("id")
+                .setFields("parents")
+                .execute();
             LOGGER.info("Uploaded successfuly finished");
         } catch (IOException e) {
             throw new CloudClientUploadException("Upload to Google Drive Failed", e);
