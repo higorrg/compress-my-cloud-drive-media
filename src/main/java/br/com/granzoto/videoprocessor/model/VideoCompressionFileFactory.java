@@ -1,13 +1,13 @@
-package br.com.granzoto.higor;
+package br.com.granzoto.videoprocessor.model;
 
 import java.math.BigInteger;
 import java.util.List;
 
 import com.google.api.services.drive.model.File;
 
-public class CompressMyFileFromGoogleFactory {
+public class VideoCompressionFileFactory {
 
-    public static CompressMyFile createFile(File googleFile) {
+    public static VideoCompressionFile createFile(File googleFile) {
         if (!googleFile.containsKey("size") || !googleFile.containsKey("parents")) {
             throw new IllegalArgumentException("Google file must have size and parents extra fields");
         }
@@ -19,6 +19,6 @@ public class CompressMyFileFromGoogleFactory {
                 parentIdArray.get(0) instanceof String parentIdString) {
             parentId = parentIdString;
         }
-        return new CompressMyFile(googleFile.getId(), googleFile.getName(), size, parentId);
+        return new VideoCompressionFile(googleFile.getId(), googleFile.getName(), size, parentId);
     }
 }
