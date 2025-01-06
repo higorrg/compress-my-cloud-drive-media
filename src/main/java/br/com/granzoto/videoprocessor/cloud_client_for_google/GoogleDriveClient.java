@@ -1,4 +1,4 @@
-package br.com.granzoto.videoprocessor.cloud_client;
+package br.com.granzoto.videoprocessor.cloud_client_for_google;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -16,8 +17,12 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.FileList;
 
-import br.com.granzoto.videoprocessor.cloud_client_for_google.GoogleDriveAuth;
+import br.com.granzoto.videoprocessor.cloud_client.CloudClient;
+import br.com.granzoto.videoprocessor.cloud_client.CloudClientDownloadException;
+import br.com.granzoto.videoprocessor.cloud_client.CloudClientListFilesException;
+import br.com.granzoto.videoprocessor.cloud_client.CloudClientUploadException;
 import br.com.granzoto.videoprocessor.model.VideoCompressionFile;
 import br.com.granzoto.videoprocessor.model.VideoCompressionFileFactory;
 
@@ -27,6 +32,7 @@ public class GoogleDriveClient implements CloudClient {
 
     private static final String APPLICATION_NAME = "Compress My Google Drive Videos";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final int PAGE_SIZE = 50;
 
     private static NetHttpTransport HTTP_TRANSPORT;
     private static GoogleDriveClient instance;
@@ -57,26 +63,35 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     @Override
-    public List<VideoCompressionFile> listFiles(String page) throws CloudClientListFilesException {
+    public List<VideoCompressionFile> listFiles() throws CloudClientListFilesException {
         List<VideoCompressionFile> result = new ArrayList<>();
+        String pageToken = null;
+        this.listFilesByPage(pageToken, result);
+        return result;
+    }
+
+    private List<VideoCompressionFile> listFilesByPage(String page, List<VideoCompressionFile> files) throws CloudClientListFilesException{
         try {
-            List<com.google.api.services.drive.model.File> googledDriveFiles = this.drive.files().list()
-                    // .setQ("trashed = false and mimeType contains 'video/' and modifiedTime < '2024-01-04T00:00:00'")
-                    .setQ("trashed = false and name = 'VID_20170328_215509.mp4'")
+            FileList googledDriveFiles = this.drive.files().list()
+                    .setQ("'me' in owners and trashed = false and mimeType contains 'video/' and modifiedTime < '2024-01-04T00:00:00'")
+                    // .setQ("trashed = false and name = 'VID_20170328_215509.mp4'")
                     .setSpaces("drive")
-                    .setPageSize(10)
+                    .setPageSize(PAGE_SIZE)
                     .setFields("nextPageToken, files(id, name, size, parents)")
                     .setPageToken(page)
-                    .execute()
-                    .getFiles();
-            googledDriveFiles.forEach(googleFile -> {
+                    .execute();
+            googledDriveFiles.getFiles().forEach(googleFile -> {
                 VideoCompressionFile compressionFile = VideoCompressionFileFactory.createVideoCompressionFileFromGoogleFile(googleFile);
-                result.add(compressionFile);
+                files.add(compressionFile);
             });
+            String nextPageToken = googledDriveFiles.getNextPageToken();
+            if (!Objects.isNull(nextPageToken)){
+                this.listFilesByPage(nextPageToken, files);
+            }
         } catch (IOException e) {
             throw new CloudClientListFilesException("Unable to get files from Google Drive", e);
         }
-        return result;
+        return files;
     }
 
     @Override

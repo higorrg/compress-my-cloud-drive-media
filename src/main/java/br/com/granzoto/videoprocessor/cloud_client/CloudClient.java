@@ -7,7 +7,7 @@ import br.com.granzoto.videoprocessor.model.VideoCompressionFile;
 
 public interface CloudClient {
 
-    public List<VideoCompressionFile> listFiles(String page) throws CloudClientListFilesException;
+    public List<VideoCompressionFile> listFiles() throws CloudClientListFilesException;
     public void downloadVideo(VideoCompressionFile compressionFile, File inputFile) throws CloudClientDownloadException;
     public void uploadVideo(File outputFile, VideoCompressionFile compressionFile) throws CloudClientUploadException;
 

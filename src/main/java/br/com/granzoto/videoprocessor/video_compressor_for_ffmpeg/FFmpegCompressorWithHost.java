@@ -10,7 +10,7 @@ public class FFmpegCompressorWithHost implements VideoCompressor {
 
     private static final Logger LOGGER = Logger.getLogger(FFmpegCompressorWithHost.class.getName());
 
-    public static FFmpegCompressorWithHost getInstance(){
+    public static synchronized FFmpegCompressorWithHost getInstance() {
         return new FFmpegCompressorWithHost();
     }
 
