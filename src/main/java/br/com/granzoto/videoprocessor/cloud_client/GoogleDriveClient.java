@@ -63,8 +63,8 @@ public class GoogleDriveClient implements CloudClient {
         List<VideoCompressionFile> result = new ArrayList<>();
         try {
             List<com.google.api.services.drive.model.File> googledDriveFiles = this.drive.files().list()
-                    // .setQ("mimeType contains 'video/' and modifiedTime < '2024-01-04T00:00:00'")
-                    .setQ("name = 'VID_20170328_215509.mp4'")
+                    // .setQ("trashed = false and mimeType contains 'video/' and modifiedTime < '2024-01-04T00:00:00'")
+                    .setQ("trashed = false and name = 'VID_20170328_215509.mp4'")
                     .setSpaces("drive")
                     .setPageSize(10)
                     .setFields("nextPageToken, files(id, name, size, parents)")
