@@ -75,7 +75,7 @@ public class GoogleDriveClient implements CloudClient {
         try {
             FileList googledDriveFiles = this.drive.files().list()
                     .setQ("'me' in owners and trashed = false and mimeType contains 'video/' and modifiedTime < '2024-01-04T00:00:00'")
-                    // .setQ("trashed = false and name = '100_0323.MOV'")
+                    // .setQ("trashed = false and (name = '100_0323.MOV' or name = 'Malone.wmv')")
                     .setSpaces("drive")
                     .setPageSize(PAGE_SIZE)
                     .setFields("nextPageToken, files(id, name, size, parents)")
@@ -99,8 +99,8 @@ public class GoogleDriveClient implements CloudClient {
     @Override
     public void downloadVideo(VideoCompressionFile compressionFile, File inputFile)
             throws CloudClientDownloadException {
-        LOGGER.info("Downloading file: " + compressionFile.name());
         try (OutputStream outputStream = new FileOutputStream(inputFile)) {
+            LOGGER.info("Downloading file: " + compressionFile.name());
             this.drive.files().get(compressionFile.id()).executeMediaAndDownloadTo(outputStream);
             LOGGER.info("Download successfuly finished");
         } catch (IOException e) {
@@ -110,10 +110,9 @@ public class GoogleDriveClient implements CloudClient {
 
     @Override
     public void uploadVideo(File outputFile, VideoCompressionFile compressionFile) throws CloudClientUploadException {
-        LOGGER.info("Uploading file: " + outputFile.getName() + "; size: "
-                + FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(outputFile)));
-
         try {
+            LOGGER.info("Uploading file: " + outputFile.getName() + "; size: "
+                    + FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(outputFile)));
             var googleFile = VideoCompressionFileFactory.createGoogleFileFromVideoCompressionFile(compressionFile);
             this.drive.files().update(compressionFile.id(), googleFile).execute();
             LOGGER.info("Uploaded successfuly finished");

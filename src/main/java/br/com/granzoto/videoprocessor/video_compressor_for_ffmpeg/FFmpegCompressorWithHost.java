@@ -37,15 +37,15 @@ public class FFmpegCompressorWithHost implements VideoCompressor {
 
             if (exitCode == 0) {
                 LOGGER.info("Video compression success " + outputFile.getName());
+                return true;
             } else {
                 LOGGER.warning("Vídeo not compressed. Exit code " + exitCode);
+                return false;
             }
         } catch (Exception e) {
             LOGGER.severe("Video compression failed: " + e.getMessage());
             return false;
         }
-
-        return true;
     }
 
 }
