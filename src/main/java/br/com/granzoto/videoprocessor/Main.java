@@ -12,18 +12,15 @@ import br.com.granzoto.videoprocessor.model.VideoCompressionFile;
 import br.com.granzoto.videoprocessor.video_compressor.VideoCompressor;
 import br.com.granzoto.videoprocessor.video_compressor_for_ffmpeg.FFmpegCompressorWithHost;
 import br.com.granzoto.videoprocessor.workflow.Workflow;
-import br.com.granzoto.videoprocessor.workflow.WorkflowCompressionStepException;
-import br.com.granzoto.videoprocessor.workflow.WorkflowDownloadStepException;
-import br.com.granzoto.videoprocessor.workflow.WorkflowUploadStepException;
 
 public class Main {
 
     public static void main(String... args) throws CloudClientListFilesException {
         CloudClient cloudClient = GoogleDriveClient.getInstance();
-        // VideoCompressor compressor = FFmpegCompressorWithHost.getInstance();
-        // Workflow workflow = Workflow.getInstance(cloudClient, compressor);
-        // workflow.run();
-        Main.listOnly(cloudClient);
+        VideoCompressor compressor = FFmpegCompressorWithHost.getInstance();
+        Workflow workflow = Workflow.getInstance(cloudClient, compressor);
+        workflow.run();
+        // Main.listOnly(cloudClient);
     }
 
     private static void listOnly(CloudClient cloudClient) throws CloudClientListFilesException {

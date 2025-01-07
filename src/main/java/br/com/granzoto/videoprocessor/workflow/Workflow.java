@@ -45,6 +45,9 @@ public class Workflow {
 
         public final void run() throws CloudClientListFilesException {
                 List<VideoCompressionFile> cloudFiles = cloudClient.listFiles();
+                List<VideoCompressionFile> downloadFail = new ArrayList<>();
+                List<VideoCompressionFile> compressFail = new ArrayList<>();
+                List<VideoCompressionFile> uploadFail = new ArrayList<>();
 
                 if (cloudFiles != null && !cloudFiles.isEmpty()) {
                         cloudFiles.forEach(myFile -> {
@@ -54,17 +57,38 @@ public class Workflow {
                                                                 + FileUtils.byteCountToDisplaySize(myFile.size())
                                                                 + ")");
                                                 this.processVideo(myFile);
-                                        } catch (WorkflowDownloadStepException
-                                                        | WorkflowCompressionStepException
-                                                        | WorkflowUploadStepException e) {
-                                                LOGGER.severe(e.getMessage());
+                                        } catch (WorkflowDownloadStepException d) {
+                                                downloadFail.add(myFile);
+                                                LOGGER.warning("Download fail: " + myFile.name());
+                                                d.printStackTrace();
+                                        } catch (WorkflowCompressionStepException c) {
+                                                compressFail.add(myFile);
+                                                LOGGER.warning("Compression fail: " + myFile.name());
+                                                c.printStackTrace();
+                                        } catch (WorkflowUploadStepException u) {
+                                                uploadFail.add(myFile);
+                                                LOGGER.warning("Upload fail: " + myFile.name());
+                                                u.printStackTrace();
                                         }
                                         LOGGER.info("-------------------------------------------------\n");
                                 } else {
                                         LOGGER.info(myFile.name() + " already compressed. Skipping file.");
                                 }
                         });
-                        // listFiles(result.getNextPageToken());
+                        if (downloadFail.size() > 0) {
+                                LOGGER.warning("Download Fail List:");
+                                downloadFail.forEach(f -> System.out.println(f.name()));
+                        }
+                        if (compressFail.size() > 0) {
+                                LOGGER.warning("Compression Fail List:");
+                                compressFail.forEach(f -> System.out.println(f.name()));
+                        }
+
+                        if (uploadFail.size() > 0) {
+                                LOGGER.warning("Upload Fail List:");
+                                uploadFail.forEach(f -> System.out.println(f.name()));
+                        }
+
                 } else {
                         LOGGER.info("No files found.");
                 }
@@ -82,16 +106,24 @@ public class Workflow {
 
         private void downloadVideo(VideoCompressionFile compressionFile, File inputFile)
                         throws WorkflowDownloadStepException {
-                try {
-                        this.cloudClient.downloadVideo(compressionFile, inputFile);
-                } catch (CloudClientDownloadException e) {
-                        throw new WorkflowDownloadStepException("Download from Google Drive failed", e);
+                if (!inputFile.exists()) {
+                        try {
+                                this.cloudClient.downloadVideo(compressionFile, inputFile);
+                        } catch (CloudClientDownloadException e) {
+                                throw new WorkflowDownloadStepException("Download from Google Drive failed", e);
+                        }
+                } else {
+                        LOGGER.warning("Download file already exists, skipping download step.");
                 }
         }
 
         private void compressVideo(File inputFile, File outputFile) throws WorkflowCompressionStepException {
-                if (!this.compressor.executeCompression(inputFile, outputFile)) {
-                        throw new WorkflowCompressionStepException("Video compression failed");
+                if (!outputFile.exists()) {
+                        if (!this.compressor.executeCompression(inputFile, outputFile)) {
+                                throw new WorkflowCompressionStepException("Video compression failed");
+                        }
+                } else {
+                        LOGGER.info("Outputfile already exists, skipping compression step.");
                 }
         }
 

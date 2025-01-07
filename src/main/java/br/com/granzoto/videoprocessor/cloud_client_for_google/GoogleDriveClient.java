@@ -58,8 +58,8 @@ public class GoogleDriveClient implements CloudClient {
         HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         return new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY,
                 GoogleDriveAuth.getCredentials(HTTP_TRANSPORT, JSON_FACTORY))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
+                        .setApplicationName(APPLICATION_NAME)
+                        .build();
     }
 
     @Override
@@ -70,22 +70,25 @@ public class GoogleDriveClient implements CloudClient {
         return result;
     }
 
-    private List<VideoCompressionFile> listFilesByPage(String page, List<VideoCompressionFile> files) throws CloudClientListFilesException{
+    private List<VideoCompressionFile> listFilesByPage(String page, List<VideoCompressionFile> files)
+            throws CloudClientListFilesException {
         try {
             FileList googledDriveFiles = this.drive.files().list()
-                    .setQ("'me' in owners and trashed = false and mimeType contains 'video/' and modifiedTime < '2024-01-04T00:00:00'")
-                    // .setQ("trashed = false and name = 'VID_20170328_215509.mp4'")
+                    // .setQ("'me' in owners and trashed = false and mimeType contains 'video/' and
+                    // modifiedTime < '2024-01-04T00:00:00'")
+                    .setQ("trashed = false and name = '100_0323.MOV'")
                     .setSpaces("drive")
                     .setPageSize(PAGE_SIZE)
                     .setFields("nextPageToken, files(id, name, size, parents)")
                     .setPageToken(page)
                     .execute();
             googledDriveFiles.getFiles().forEach(googleFile -> {
-                VideoCompressionFile compressionFile = VideoCompressionFileFactory.createVideoCompressionFileFromGoogleFile(googleFile);
+                VideoCompressionFile compressionFile = VideoCompressionFileFactory
+                        .createVideoCompressionFileFromGoogleFile(googleFile);
                 files.add(compressionFile);
             });
             String nextPageToken = googledDriveFiles.getNextPageToken();
-            if (!Objects.isNull(nextPageToken)){
+            if (!Objects.isNull(nextPageToken)) {
                 this.listFilesByPage(nextPageToken, files);
             }
         } catch (IOException e) {
@@ -98,15 +101,11 @@ public class GoogleDriveClient implements CloudClient {
     public void downloadVideo(VideoCompressionFile compressionFile, File inputFile)
             throws CloudClientDownloadException {
         LOGGER.info("Downloading file: " + compressionFile.name());
-        if (!inputFile.exists()) {
-            try (OutputStream outputStream = new FileOutputStream(inputFile)) {
-                this.drive.files().get(compressionFile.id()).executeMediaAndDownloadTo(outputStream);
-                LOGGER.info("Download successfuly finished");
-            } catch (IOException e) {
-                throw new CloudClientDownloadException("Download from Google Drive failed", e);
-            }
-        } else {
-            LOGGER.warning("Download file already exists. Skipping Download step.");
+        try (OutputStream outputStream = new FileOutputStream(inputFile)) {
+            this.drive.files().get(compressionFile.id()).executeMediaAndDownloadTo(outputStream);
+            LOGGER.info("Download successfuly finished");
+        } catch (IOException e) {
+            throw new CloudClientDownloadException("Download from Google Drive failed", e);
         }
     }
 
