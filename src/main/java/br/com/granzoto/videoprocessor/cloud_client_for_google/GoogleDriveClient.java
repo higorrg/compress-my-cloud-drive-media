@@ -74,9 +74,8 @@ public class GoogleDriveClient implements CloudClient {
             throws CloudClientListFilesException {
         try {
             FileList googledDriveFiles = this.drive.files().list()
-                    // .setQ("'me' in owners and trashed = false and mimeType contains 'video/' and
-                    // modifiedTime < '2024-01-04T00:00:00'")
-                    .setQ("trashed = false and name = '100_0323.MOV'")
+                    .setQ("'me' in owners and trashed = false and mimeType contains 'video/' and modifiedTime < '2024-01-04T00:00:00'")
+                    // .setQ("trashed = false and name = '100_0323.MOV'")
                     .setSpaces("drive")
                     .setPageSize(PAGE_SIZE)
                     .setFields("nextPageToken, files(id, name, size, parents)")

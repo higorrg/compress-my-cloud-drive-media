@@ -2,8 +2,10 @@ package br.com.granzoto.videoprocessor;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.logging.LogManager;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import br.com.granzoto.videoprocessor.cloud_client.CloudClient;
 import br.com.granzoto.videoprocessor.cloud_client.CloudClientListFilesException;
@@ -16,6 +18,7 @@ import br.com.granzoto.videoprocessor.workflow.Workflow;
 public class Main {
 
     public static void main(String... args) throws CloudClientListFilesException {
+        setupLog();
         CloudClient cloudClient = GoogleDriveClient.getInstance();
         VideoCompressor compressor = FFmpegCompressorWithHost.getInstance();
         Workflow workflow = Workflow.getInstance(cloudClient, compressor);
@@ -36,7 +39,11 @@ public class Main {
             System.out.println("Total items: " + cloudFiles.size());
 
         }
+    }
 
+    private static void setupLog(){
+        LogManager.getLogManager().reset();
+        SLF4JBridgeHandler.install();
     }
 
 }
