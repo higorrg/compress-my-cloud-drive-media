@@ -31,7 +31,6 @@ public class GoogleDriveClient implements CloudClient {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final int PAGE_SIZE = 50;
 
-    private static NetHttpTransport HTTP_TRANSPORT;
     private static GoogleDriveClient instance;
 
     private final Drive drive;
@@ -52,9 +51,9 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     private Drive initializeDrive() throws GeneralSecurityException, IOException {
-        HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        return new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY,
-                GoogleDriveAuth.getCredentials(HTTP_TRANSPORT, JSON_FACTORY))
+        NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+        return new Drive.Builder(transport, JSON_FACTORY,
+                GoogleDriveAuth.getCredentials(transport, JSON_FACTORY))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
@@ -75,7 +74,7 @@ public class GoogleDriveClient implements CloudClient {
         return result;
     }
 
-    private List<CompressionFile> listFilesByPage(String page, List<CompressionFile> files)
+    private void listFilesByPage(String page, List<CompressionFile> files)
             throws CloudClientListFilesException {
         try {
             FileList googledDriveFiles = this.drive.files().list()
@@ -92,16 +91,12 @@ public class GoogleDriveClient implements CloudClient {
                     .setPageToken(page)
                     .execute();
             googledDriveFiles.getFiles().forEach(googleFile -> {
-                try {
-                    CompressionFile compressionFile = CompressionFileFactory
-                            .createCompressionFileFromGoogleFile(googleFile);
-                    files.add(compressionFile);
-                    System.out.println(
-                            compressionFile.name() + " | " + compressionFile.mimeSuperType() + " | "
-                                    + compressionFile.size());
-                } catch (IOException e) {
-                    System.out.println("Unable to get file from Google Drive: " + googleFile.getName());
-                }
+                CompressionFile compressionFile = CompressionFileFactory
+                        .createCompressionFileFromGoogleFile(googleFile);
+                files.add(compressionFile);
+                System.out.println(
+                        compressionFile.name() + " | " + compressionFile.mimeSuperType() + " | "
+                                + compressionFile.size());
             });
             String nextPageToken = googledDriveFiles.getNextPageToken();
             if (!Objects.isNull(nextPageToken)) {
@@ -110,7 +105,6 @@ public class GoogleDriveClient implements CloudClient {
         } catch (IOException e) {
             throw new CloudClientListFilesException("Unable to get files from Google Drive", e);
         }
-        return files;
     }
 
     @Override
@@ -135,9 +129,9 @@ public class GoogleDriveClient implements CloudClient {
             this.drive.files().update(compressionFile.id(), googleFile, mediaContent)
                     .setFields("id, name, mimeType")
                     .execute();
-            LOGGER.info("Uploaded successfuly finished");
+            LOGGER.info("Upload successfully finished");
         } catch (IOException e) {
-            throw new CloudClientUploadException("Upload to Google Drive Failed", e);
+            throw new CloudClientUploadException("Upload to Google Drive failed", e);
         }
     }
 
@@ -146,7 +140,7 @@ public class GoogleDriveClient implements CloudClient {
         try {
             this.drive.files().delete(myFile.id()).execute();
         } catch (IOException e) {
-            throw new CloudClientDeleteException("Delete Google Drive File Failed: " + myFile.name(), e);
+            throw new CloudClientDeleteException("Delete Google Drive file failed: " + myFile.name(), e);
         }
     }
 }

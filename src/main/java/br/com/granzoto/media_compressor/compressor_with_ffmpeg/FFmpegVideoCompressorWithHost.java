@@ -19,7 +19,7 @@ public class FFmpegVideoCompressorWithHost implements CompressorStrategy {
         try {
             String[] cmd = { "ffmpeg",
                     "-y",
-                    "-loglevel", "info",
+                    "-loglevel", "quiet",
                     "-i", inputFile.getAbsolutePath().replaceAll(" ", "\\ "),
                     // "-c:v", "libvvenc",
                     "-c:v", "h264",
@@ -36,7 +36,7 @@ public class FFmpegVideoCompressorWithHost implements CompressorStrategy {
             System.out.println("");
 
             if (exitCode == 0) {
-                LOGGER.info("Video compression success " + outputFile.getName());
+                LOGGER.info("Video compression successfully finished " + outputFile.getName());
                 return true;
             } else {
                 LOGGER.warning("Vídeo not compressed. Exit code " + exitCode);

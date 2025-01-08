@@ -19,7 +19,7 @@ public class FFmpegImageCompressorWithHost implements CompressorStrategy {
         try {
             String[] cmd = { "ffmpeg",
                     "-y",
-                    "-loglevel", "info",
+                    "-loglevel", "quiet",
                     "-i", inputFile.getAbsolutePath().replaceAll(" ", "\\ "),
                     "-q:v", "2",
                     outputFile.getAbsolutePath().replaceAll(" ", "\\ ") };
@@ -30,7 +30,7 @@ public class FFmpegImageCompressorWithHost implements CompressorStrategy {
             System.out.println("");
 
             if (exitCode == 0) {
-                LOGGER.info("Image compression success " + outputFile.getName());
+                LOGGER.info("Image compression successfully finished " + outputFile.getName());
                 return true;
             } else {
                 LOGGER.warning("Image not compressed. Exit code " + exitCode);
