@@ -11,7 +11,7 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <main.class>br.com.granzoto.higor.Main</main.class>
+        <main.class>br.com.granzoto.media_compressor.Main</main.class>
     </properties>
 
     <dependencies>
@@ -59,6 +59,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
             <version>2.0.16</version>
+        </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.9</version>
         </dependency>
     </dependencies>
 

@@ -1,4 +1,4 @@
-package br.com.granzoto.videoprocessor.cloud_client_for_google;
+package br.com.granzoto.media_compressor.cloud_client_for_google;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package br.com.granzoto.videoprocessor.cloud_client;
+package br.com.granzoto.media_compressor.cloud_client;
 
 public class CloudClientDownloadException extends Exception{
 

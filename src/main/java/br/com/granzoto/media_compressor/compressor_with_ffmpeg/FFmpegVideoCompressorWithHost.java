@@ -1,17 +1,17 @@
-package br.com.granzoto.videoprocessor.video_compressor_for_ffmpeg;
+package br.com.granzoto.media_compressor.compressor_with_ffmpeg;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import br.com.granzoto.videoprocessor.video_compressor.VideoCompressor;
+import br.com.granzoto.media_compressor.compressor_strategy.CompressorStrategy;
 
-public class FFmpegCompressorWithHost implements VideoCompressor {
+public class FFmpegVideoCompressorWithHost implements CompressorStrategy {
 
-    private static final Logger LOGGER = Logger.getLogger(FFmpegCompressorWithHost.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FFmpegVideoCompressorWithHost.class.getName());
 
-    public static synchronized FFmpegCompressorWithHost getInstance() {
-        return new FFmpegCompressorWithHost();
+    public static synchronized FFmpegVideoCompressorWithHost getInstance() {
+        return new FFmpegVideoCompressorWithHost();
     }
 
     @Override

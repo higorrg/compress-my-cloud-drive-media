@@ -1,4 +1,4 @@
-package br.com.granzoto.videoprocessor.workflow;
+package br.com.granzoto.media_compressor.workflow;
 
 public class WorkflowUploadStepException extends Exception {
 
