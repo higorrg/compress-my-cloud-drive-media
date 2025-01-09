@@ -8,6 +8,7 @@ import br.com.granzoto.media_compressor.compressor_strategy.CompressorFactory;
 import br.com.granzoto.media_compressor.compressor_strategy.CompressorStrategy;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -35,31 +36,31 @@ public class Workflow {
 
     public Workflow(CloudClient cloudClient) {
         if (Objects.isNull(cloudClient)) {
-            throw new IllegalStateException("Cloud client must not be null");
+            throw new IllegalArgumentException("Cloud client must not be null");
         }
         this.cloudClient = cloudClient;
     }
 
     public final void run() throws CloudClientListFilesException {
-        List<CompressionFile> cloudFiles = cloudClient.listFiles();
+        List<CompressionFile> compressionFileList = cloudClient.listFiles();
 
-        if (Objects.nonNull(cloudFiles) && !cloudFiles.isEmpty()) {
-            cloudFiles.forEach(myFile -> {
-                if (!compressedFileNames.contains(myFile.name())) {
+        if (Objects.nonNull(compressionFileList) && !compressionFileList.isEmpty()) {
+            compressionFileList.forEach(compressionFile -> {
+                if (!compressedFileNames.contains(compressionFile.name())) {
                     try {
-                        LOGGER.info("BOF: "+myFile.name());
-                        this.processMedia(myFile);
-                        compressedFileNames.add(myFile.name());
+                        LOGGER.info("BOF: " + compressionFile.name());
+                        this.processMedia(compressionFile);
+                        compressedFileNames.add(compressionFile.name());
                     } catch (WorkflowDownloadStepException d) {
-                        LOGGER.warning("Download fail: " + myFile.name());
+                        LOGGER.warning("Download fail: " + compressionFile.name());
                     } catch (WorkflowCompressionStepException c) {
-                        LOGGER.warning("Compression fail: " + myFile.name());
+                        LOGGER.warning("Compression fail: " + compressionFile.name());
                     } catch (WorkflowUploadStepException u) {
-                        LOGGER.warning("Upload fail: " + myFile.name());
+                        LOGGER.warning("Upload fail: " + compressionFile.name());
                     }
-                    LOGGER.info("EOF: "+myFile.name());
+                    LOGGER.info("EOF: " + compressionFile.name());
                 } else {
-                    LOGGER.info(myFile.name() + " already compressed. Skipping file.");
+                    LOGGER.info(compressionFile.name() + " already compressed. Skipping file.");
                 }
             });
         } else {
@@ -95,14 +96,26 @@ public class Workflow {
 
     private void downloadMedia(CompressionFile compressionFile, File inputFile)
             throws WorkflowDownloadStepException {
-        if (!inputFile.exists()) {
+        File downloadFile = inputFile;
+        if (inputFile.exists()) {
             try {
-                this.cloudClient.downloadFile(compressionFile, inputFile);
-            } catch (CloudClientDownloadException e) {
-                throw new WorkflowDownloadStepException("Download from Google Drive failed", e);
+                File duplicateDirectory = Path.of(inputFile.getParentFile().getPath(),
+                                FilenameUtils.getBaseName(inputFile.getName()))
+                        .toFile();
+                FileUtils.createParentDirectories(duplicateDirectory);
+                downloadFile = Path.of(duplicateDirectory.getPath(),
+                                compressionFile.id() + "-" + compressionFile.name())
+                        .toFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        } else {
-            LOGGER.warning("Download file already exists, skipping download step.");
+            LOGGER.warning("Download file already exists, duplicate file created at " + downloadFile.getAbsolutePath());
+        }
+
+        try {
+            this.cloudClient.downloadFile(compressionFile, downloadFile);
+        } catch (CloudClientDownloadException e) {
+            throw new WorkflowDownloadStepException("Download from Google Drive failed", e);
         }
     }
 

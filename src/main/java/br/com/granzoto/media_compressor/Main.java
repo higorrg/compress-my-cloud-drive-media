@@ -21,9 +21,14 @@ public class Main {
         setupLog();
         CloudClient cloudClient = GoogleDriveClient.getInstance();
         Workflow workflow = Workflow.getInstance(cloudClient);
-        workflow.run();
+//        workflow.run();
+        Main.listOnly(cloudClient);
 //        Main.listToCsv(cloudClient);
         // Main.deleteAll(cloudClient);
+    }
+
+    private static void listOnly(CloudClient cloudClient) throws CloudClientListFilesException {
+        cloudClient.listFiles();
     }
 
 //    private static void uploadCompressed(CloudClient cloudClient)
@@ -51,26 +56,26 @@ public class Main {
 //        }
 //    }
 
-    private static void listToCsv(CloudClient cloudClient) throws CloudClientListFilesException {
-        System.out.println("List only in progress");
-        List<CompressionFile> files = cloudClient.listFiles();
-        File csvFile = Path.of("/tmp/google-drive-files.csv").toFile();
-        System.out.println("Writing CSV file " + csvFile.getAbsolutePath());
-        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
-            files.forEach(file -> {
-                String[] line = new String[5];
-                line[0] = file.id();
-                line[1] = file.name();
-                line[2] = file.mimeSuperType();
-                line[4] = file.size().toString();
-                writer.writeNext(line);
-                System.out.println(line);
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
+//    private static void listToCsv(CloudClient cloudClient) throws CloudClientListFilesException {
+//        System.out.println("List only in progress");
+//        List<CompressionFile> files = cloudClient.listFiles();
+//        File csvFile = Path.of("/tmp/google-drive-files.csv").toFile();
+//        System.out.println("Writing CSV file " + csvFile.getAbsolutePath());
+//        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFile))) {
+//            files.forEach(file -> {
+//                String[] line = new String[5];
+//                line[0] = file.id();
+//                line[1] = file.name();
+//                line[2] = file.mimeSuperType();
+//                line[4] = file.size().toString();
+//                writer.writeNext(line);
+//                System.out.println(line);
+//            });
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
 
     private static void setupLog() {
         LogManager.getLogManager().reset();

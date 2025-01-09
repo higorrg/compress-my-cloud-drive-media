@@ -60,17 +60,17 @@ public class GoogleDriveClient implements CloudClient {
 
     @Override
     public List<CompressionFile> listFiles() throws CloudClientListFilesException {
-        System.out.println("Listing media files from your Google Drive");
-        System.out.println("Name | MimeSuperType | Size");
+        LOGGER.info("Listing media files from your Google Drive");
+        LOGGER.info("Name | MimeSuperType | Size");
         List<CompressionFile> result = new ArrayList<>();
         this.listFilesByPage(null, result);
-        BigInteger totalSize = result.stream().map(CompressionFile::size).reduce(BigInteger.ZERO,
-                BigInteger::add);
-        System.out.println();
-        System.out.println("Total size: " + FileUtils.byteCountToDisplaySize(totalSize));
-        System.out.println("Total items: " + result.size());
-        System.out.println();
-
+        BigInteger totalSize = result.stream()
+                .map(CompressionFile::size)
+                .reduce(BigInteger.ZERO, BigInteger::add);
+        LOGGER.info("");
+        LOGGER.info("Total size: " + FileUtils.byteCountToDisplaySize(totalSize));
+        LOGGER.info("Total items: " + result.size());
+        LOGGER.info("");
         return result;
     }
 
@@ -94,9 +94,7 @@ public class GoogleDriveClient implements CloudClient {
                 CompressionFile compressionFile = CompressionFileFactory
                         .createCompressionFileFromGoogleFile(googleFile);
                 files.add(compressionFile);
-                System.out.println(
-                        compressionFile.name() + " | " + compressionFile.mimeSuperType() + " | "
-                                + compressionFile.size());
+                LOGGER.info(compressionFile.toString());
             });
             String nextPageToken = googledDriveFiles.getNextPageToken();
             if (!Objects.isNull(nextPageToken)) {
@@ -113,7 +111,7 @@ public class GoogleDriveClient implements CloudClient {
         try (OutputStream outputStream = new FileOutputStream(inputFile)) {
             LOGGER.info("Downloading file: " + compressionFile.name());
             this.drive.files().get(compressionFile.id()).executeMediaAndDownloadTo(outputStream);
-            LOGGER.info("Download successfuly finished");
+            LOGGER.info("Download successfully finished");
         } catch (IOException e) {
             throw new CloudClientDownloadException("Download from Google Drive failed", e);
         }
@@ -139,6 +137,7 @@ public class GoogleDriveClient implements CloudClient {
     public void delete(CompressionFile myFile) throws CloudClientDeleteException {
         try {
             this.drive.files().delete(myFile.id()).execute();
+            LOGGER.info("File successfully deleted "+myFile.name());
         } catch (IOException e) {
             throw new CloudClientDeleteException("Delete Google Drive file failed: " + myFile.name(), e);
         }
