@@ -2,9 +2,12 @@ package br.com.granzoto.media_compressor.model;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import com.google.api.services.drive.model.File;
+import com.google.common.base.Strings;
 
 public class CompressionFileFactory {
 
@@ -17,15 +20,12 @@ public class CompressionFileFactory {
         return new CompressionFile(googleFile.getId(), googleFile.getName(), size, parentId, extractMimeSuperType(googleFile.getMimeType()));
     }
 
-    private static String extractMimeSuperType(String mimeType){
-        if (Objects.isNull(mimeType)){
+    static String extractMimeSuperType(String mimeType){
+        if (Strings.isNullOrEmpty(mimeType)){
             throw new IllegalArgumentException("MimeType required");
         }
-        String[] mimeTypeItems = mimeType.split("/");
-        if (mimeType.isEmpty()){
-            throw new IllegalArgumentException("MimeType not supported. Try video/mp4 or image/png");
-        }
-        return mimeTypeItems[0];
+        var mimeTypeList = new ArrayList<String>(Arrays.asList(mimeType.split("/")));
+        return mimeTypeList.getFirst();
     }
 
 }
