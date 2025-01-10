@@ -8,7 +8,6 @@ import br.com.granzoto.media_compressor.compressor_strategy.CompressorFactory;
 import br.com.granzoto.media_compressor.compressor_strategy.CompressorStrategy;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.annotation.Nonnull;
 import java.io.File;

@@ -1,5 +1,6 @@
 package br.com.granzoto.media_compressor.cloud_client_observer;
 
+import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClietListItemObserver;
 import br.com.granzoto.media_compressor.cloud_client_for_google.GoogleDriveClient;
 import br.com.granzoto.media_compressor.model.CompressionFile;
@@ -14,7 +15,7 @@ public class CloudClientListItemObserverForLog implements CloudClietListItemObse
     private static final Logger LOGGER = Logger.getLogger(CloudClientListItemObserverForLog.class.getName());
 
     @Override
-    public void notifyStart() {
+    public void notifyStart(CloudClient cloudClient) {
         LOGGER.info("Listing media files from your Google Drive");
     }
 

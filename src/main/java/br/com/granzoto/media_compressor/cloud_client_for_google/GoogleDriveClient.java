@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -67,7 +66,7 @@ public class GoogleDriveClient implements CloudClient {
 
     @Override
     public List<CompressionFile> listFiles() throws CloudClientListFilesException {
-        this.listItemObservers.forEach(CloudClietListItemObserver::notifyStart);
+        this.listItemObservers.forEach(o -> o.notifyStart(this));
         Map<String, FolderInfo> folderPaths = new HashMap<>();
         List<CompressionFile> files = new ArrayList<>();
         this.listFilesByPage(null, folderPaths, files);
@@ -78,20 +77,7 @@ public class GoogleDriveClient implements CloudClient {
     private void listFilesByPage(String page, Map<String, FolderInfo> folderPaths, List<CompressionFile> files)
             throws CloudClientListFilesException {
         try {
-            FileList googleDriveFiles = this.drive.files().list()
-                    .setQ("""
-                            'me' in owners and
-                            trashed = false and
-                            (mimeType='application/vnd.google-apps.folder' or
-                            mimeType contains 'video/' or
-                            mimeType contains 'image/')
-                            and modifiedTime < '2024-01-08T00:00:00'
-                            """)
-                    .setSpaces("drive")
-                    .setPageSize(PAGE_SIZE)
-                    .setFields("nextPageToken, files(id, name, parents, mimeType)")
-                    .setPageToken(page)
-                    .execute();
+            FileList googleDriveFiles = getFileList(page);
 
             googleDriveFiles.getFiles().forEach(googleFile -> {
                 if (APPLICATION_VND_GOOGLE_APPS_FOLDER.equals(googleFile.getMimeType())) {
@@ -111,6 +97,24 @@ public class GoogleDriveClient implements CloudClient {
         } catch (IOException e) {
             throw new CloudClientListFilesException("Unable to get files from Google Drive", e);
         }
+    }
+
+    private FileList getFileList(String page) throws IOException {
+        return this.drive.files().list()
+                .setQ("""
+                        'me' in owners and
+                        trashed = false and
+                        (mimeType='application/vnd.google-apps.folder' or
+                        mimeType contains 'video/' or
+                        mimeType contains 'image/') and
+                        modifiedTime < '2024-01-04T00:00:00'
+                        """)
+                .setSpaces("drive")
+                .setPageSize(PAGE_SIZE)
+                .setFields("nextPageToken, files(id, name, parents, size, mimeType)")
+                .setOrderBy("folder")
+                .setPageToken(page)
+                .execute();
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CloudClietListItemObserver {
 
-    void notifyStart();
+    void notifyStart(CloudClient cloudClient);
     void notifyItem(CompressionFile compressionFile);
     void notifyEnd(List<CompressionFile> files);
 

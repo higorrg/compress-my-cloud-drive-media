@@ -1,5 +1,6 @@
 package br.com.granzoto.media_compressor.cloud_client_observer;
 
+import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClietListItemObserver;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import com.opencsv.CSVWriter;
@@ -15,7 +16,7 @@ public class CloudClientListItemObserverForCsv implements CloudClietListItemObse
     private CSVWriter writer;
 
     @Override
-    public void notifyStart() {
+    public void notifyStart(CloudClient cloudClient) {
         System.out.println("List only in progress");
         File csvFile = Path.of("/tmp/google-drive-files.csv").toFile();
         try {
@@ -35,7 +36,6 @@ public class CloudClientListItemObserverForCsv implements CloudClietListItemObse
         line[3] = compressionFile.mimeSuperType();
         line[4] = compressionFile.size().toString();
         writer.writeNext(line);
-        System.out.println(compressionFile);
     }
 
     @Override
