@@ -1,71 +1,82 @@
 package br.com.granzoto.media_compressor.model;
 
 import com.google.api.services.drive.model.File;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class CompressionFileFactoryTest {
+class CompressionFileFactoryTest {
 
-    @Test
-    void testCreateCompressionFileFromGoogleFile_ValidInput() {
-        // Arrange: Create a mock File object
-        File mockGoogleFile = mock(File.class);
-        when(mockGoogleFile.get("size")).thenReturn("123456");
-        when(mockGoogleFile.containsKey("size")).thenReturn(true);
-        when(mockGoogleFile.containsKey("parents")).thenReturn(true);
-        when(mockGoogleFile.containsKey("mimeType")).thenReturn(true);
-        when(mockGoogleFile.getParents()).thenReturn(List.of("parent-folder-id"));
-        when(mockGoogleFile.getMimeType()).thenReturn("video/mp4");
-        when(mockGoogleFile.getId()).thenReturn("file-id");
-        when(mockGoogleFile.getName()).thenReturn("example.mp4");
+    private Map<String, FolderInfo> folderPaths;
 
-        // Act
-        CompressionFile result = CompressionFileFactory.createCompressionFileFromGoogleFile(mockGoogleFile);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("file-id", result.id());
-        assertEquals("example.mp4", result.name());
-        assertEquals(BigInteger.valueOf(123456), result.size());
-        assertEquals("parent-folder-id", result.parent());
-        assertEquals("video", result.mimeSuperType());
+    @BeforeEach
+    void setUp() {
+        folderPaths = new HashMap<>();
+        folderPaths.put("folder1", new FolderInfo("FolderA", null));
+        folderPaths.put("folder2", new FolderInfo("FolderB", null));
+        folderPaths.put("folder3", new FolderInfo("SubFolderB1", "folder2"));
     }
 
     @Test
-    void testCreateCompressionFileFromGoogleFile_MissingFields() {
-        // Arrange: Mock File without required fields
-        File mockGoogleFile = mock(File.class);
-        when(mockGoogleFile.containsKey("size")).thenReturn(false);
+    void testCreateCompressionFileFromGoogleFile_ValidInput() {
+        // Arrange
+        File googleFile = mock(File.class);
+        when(googleFile.containsKey("size")).thenReturn(true);
+        when(googleFile.containsKey("parents")).thenReturn(true);
+        when(googleFile.containsKey("mimeType")).thenReturn(true);
+        when(googleFile.get("size")).thenReturn("123456");
+        when(googleFile.getParents()).thenReturn(java.util.List.of("folder3"));
+        when(googleFile.getId()).thenReturn("file1");
+        when(googleFile.getName()).thenReturn("example.mp4");
+        when(googleFile.getMimeType()).thenReturn("video/mp4");
 
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> CompressionFileFactory.createCompressionFileFromGoogleFile(mockGoogleFile)
-        );
+        // Act
+        CompressionFile compressionFile = CompressionFileFactory.createCompressionFileFromGoogleFile(googleFile, folderPaths);
 
-        assertEquals("Google file must have 'size', 'parents' and 'mimeType' extra fields", exception.getMessage());
+        // Assert
+        assertNotNull(compressionFile);
+        assertEquals("file1", compressionFile.id());
+        assertEquals("example.mp4", compressionFile.name());
+        assertEquals(BigInteger.valueOf(123456), compressionFile.size());
+        assertEquals("FolderB/SubFolderB1", compressionFile.folderPath());
+        assertEquals("video", compressionFile.mimeSuperType());
     }
 
     @Test
     void testCreateCompressionFileFromGoogleFile_InvalidSize() {
-        // Arrange: Mock File with invalid size
-        File mockGoogleFile = mock(File.class);
-        when(mockGoogleFile.containsKey("size")).thenReturn(true);
-        when(mockGoogleFile.containsKey("parents")).thenReturn(true);
-        when(mockGoogleFile.containsKey("mimeType")).thenReturn(true);
-        when(mockGoogleFile.get("size")).thenReturn("invalid-size");
-        when(mockGoogleFile.getParents()).thenReturn(List.of("parent-folder-id"));
-        when(mockGoogleFile.getMimeType()).thenReturn("video/mp4");
+        // Arrange
+        File googleFile = mock(File.class);
+        when(googleFile.containsKey("size")).thenReturn(true);
+        when(googleFile.containsKey("parents")).thenReturn(true);
+        when(googleFile.containsKey("mimeType")).thenReturn(true);
+        when(googleFile.get("size")).thenReturn("invalid-size");
+        when(googleFile.getParents()).thenReturn(java.util.List.of("folder3"));
+        when(googleFile.getMimeType()).thenReturn("video/mp4");
 
         // Act & Assert
         assertThrows(NumberFormatException.class, () ->
-                CompressionFileFactory.createCompressionFileFromGoogleFile(mockGoogleFile)
+                CompressionFileFactory.createCompressionFileFromGoogleFile(googleFile, folderPaths)
         );
+    }
+
+    @Test
+    void testCreateCompressionFileFromGoogleFile_MissingFields() {
+        // Arrange
+        File googleFile = mock(File.class);
+        when(googleFile.containsKey("size")).thenReturn(false);
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                CompressionFileFactory.createCompressionFileFromGoogleFile(googleFile, folderPaths)
+        );
+        assertEquals("Google file must have 'size', 'parents' and 'mimeType' extra fields", exception.getMessage());
     }
 
     @Test
@@ -78,23 +89,29 @@ public class CompressionFileFactoryTest {
     }
 
     @Test
-    void testExtractMimeSuperType_NullMimeType() {
+    void testExtractMimeSuperType_InvalidMimeType() {
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> CompressionFileFactory.extractMimeSuperType(null)
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                CompressionFileFactory.extractMimeSuperType("")
         );
         assertEquals("MimeType required", exception.getMessage());
     }
 
     @Test
-    void testExtractMimeSuperType_EmptyMimeType() {
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> CompressionFileFactory.extractMimeSuperType("")
-        );
-        assertEquals("MimeType required", exception.getMessage());
+    void testResolveFullPath_ValidPath() {
+        // Act
+        String fullPath = CompressionFileFactory.resolveFullPath("folder3", folderPaths);
+
+        // Assert
+        assertEquals("FolderB/SubFolderB1", fullPath);
     }
 
+    @Test
+    void testResolveFullPath_RootFolder() {
+        // Act
+        String fullPath = CompressionFileFactory.resolveFullPath(null, folderPaths);
+
+        // Assert
+        assertEquals("", fullPath);
+    }
 }

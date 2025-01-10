@@ -3,6 +3,7 @@ package br.com.granzoto.media_compressor.cloud_client_for_google;
 import br.com.granzoto.media_compressor.cloud_client.*;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import br.com.granzoto.media_compressor.model.CompressionFileFactory;
+import br.com.granzoto.media_compressor.model.FolderInfo;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -18,9 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class GoogleDriveClient implements CloudClient {
@@ -30,10 +29,13 @@ public class GoogleDriveClient implements CloudClient {
     private static final String APPLICATION_NAME = "Compress My Google Drive Media";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final int PAGE_SIZE = 50;
+    public static final String APPLICATION_VND_GOOGLE_APPS_FOLDER = "application/vnd.google-apps.folder";
 
     private static GoogleDriveClient instance;
 
     private final Drive drive;
+
+    private final List<CloudClietListItemObserver> listItemObservers = new ArrayList<>();
 
     public static synchronized GoogleDriveClient getInstance() {
         if (instance == null) {
@@ -59,46 +61,52 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     @Override
-    public List<CompressionFile> listFiles() throws CloudClientListFilesException {
-        LOGGER.info("Listing media files from your Google Drive");
-        LOGGER.info("Name | MimeSuperType | Size");
-        List<CompressionFile> result = new ArrayList<>();
-        this.listFilesByPage(null, result);
-        BigInteger totalSize = result.stream()
-                .map(CompressionFile::size)
-                .reduce(BigInteger.ZERO, BigInteger::add);
-        LOGGER.info("");
-        LOGGER.info("Total size: " + FileUtils.byteCountToDisplaySize(totalSize));
-        LOGGER.info("Total items: " + result.size());
-        LOGGER.info("");
-        return result;
+    public void addListObserver(CloudClietListItemObserver listItemObserver) {
+        this.listItemObservers.add(listItemObserver);
     }
 
-    private void listFilesByPage(String page, List<CompressionFile> files)
+    @Override
+    public List<CompressionFile> listFiles() throws CloudClientListFilesException {
+        this.listItemObservers.forEach(CloudClietListItemObserver::notifyStart);
+        Map<String, FolderInfo> folderPaths = new HashMap<>();
+        List<CompressionFile> files = new ArrayList<>();
+        this.listFilesByPage(null, folderPaths, files);
+        this.listItemObservers.forEach(o -> o.notifyEnd(files));
+        return files;
+    }
+
+    private void listFilesByPage(String page, Map<String, FolderInfo> folderPaths, List<CompressionFile> files)
             throws CloudClientListFilesException {
         try {
-            FileList googledDriveFiles = this.drive.files().list()
+            FileList googleDriveFiles = this.drive.files().list()
                     .setQ("""
                             'me' in owners and
                             trashed = false and
-                            (mimeType contains 'video/' or
+                            (mimeType='application/vnd.google-apps.folder' or
+                            mimeType contains 'video/' or
                             mimeType contains 'image/')
+                            and modifiedTime < '2024-01-08T00:00:00'
                             """)
-//                    .setQ("trashed = false and name = 'IMG_20200926_172840.jpg'")
                     .setSpaces("drive")
                     .setPageSize(PAGE_SIZE)
-                    .setFields("nextPageToken, files(id, name, size, parents, mimeType)")
+                    .setFields("nextPageToken, files(id, name, parents, mimeType)")
                     .setPageToken(page)
                     .execute();
-            googledDriveFiles.getFiles().forEach(googleFile -> {
-                CompressionFile compressionFile = CompressionFileFactory
-                        .createCompressionFileFromGoogleFile(googleFile);
-                files.add(compressionFile);
-                LOGGER.info(compressionFile.toString());
+
+            googleDriveFiles.getFiles().forEach(googleFile -> {
+                if (APPLICATION_VND_GOOGLE_APPS_FOLDER.equals(googleFile.getMimeType())) {
+                    String parentId = !Objects.isNull(googleFile.getParents()) ? googleFile.getParents().getFirst() : null;
+                    folderPaths.put(googleFile.getId(), new FolderInfo(googleFile.getName(), parentId));
+                } else {
+                    CompressionFile compressionFile = CompressionFileFactory.createCompressionFileFromGoogleFile(googleFile, folderPaths);
+                    files.add(compressionFile);
+                    this.listItemObservers.forEach(o -> o.notifyItem(compressionFile));
+                }
             });
-            String nextPageToken = googledDriveFiles.getNextPageToken();
-            if (!Objects.isNull(nextPageToken)) {
-                this.listFilesByPage(nextPageToken, files);
+
+            String nextPageToken = googleDriveFiles.getNextPageToken();
+            if (nextPageToken != null) {
+                this.listFilesByPage(nextPageToken, folderPaths, files);
             }
         } catch (IOException e) {
             throw new CloudClientListFilesException("Unable to get files from Google Drive", e);
@@ -137,7 +145,7 @@ public class GoogleDriveClient implements CloudClient {
     public void delete(CompressionFile myFile) throws CloudClientDeleteException {
         try {
             this.drive.files().delete(myFile.id()).execute();
-            LOGGER.info("File successfully deleted "+myFile.name());
+            LOGGER.info("File successfully deleted " + myFile.name());
         } catch (IOException e) {
             throw new CloudClientDeleteException("Delete Google Drive file failed: " + myFile.name(), e);
         }

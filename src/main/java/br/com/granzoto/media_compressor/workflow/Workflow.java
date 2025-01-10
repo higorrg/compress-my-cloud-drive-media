@@ -71,49 +71,44 @@ public class Workflow {
     private void processMedia(CompressionFile compressionFile)
             throws WorkflowDownloadStepException, WorkflowCompressionStepException,
             WorkflowUploadStepException {
-        var inputFile = Path.of(DOWNLOAD_PATH.toString(),
-                        compressionFile.mimeSuperType(),
-                        compressionFile.name())
-                .toFile();
-        var outputFile = Path.of(UPLOAD_PATH.toString(),
-                        compressionFile.mimeSuperType(),
-                        inputFile.getName())
-                .toFile();
-        makeDirs(inputFile);
-        makeDirs(outputFile);
+        var inputFile = createInputFile(compressionFile);
+        var outputFile = createOutputFile(compressionFile);
         downloadMedia(compressionFile, inputFile);
         compressMedia(inputFile, outputFile, compressionFile.mimeSuperType());
         uploadMedia(outputFile, compressionFile);
     }
 
-    private void makeDirs(File file) throws WorkflowCompressionStepException {
+    private File createInputFile(CompressionFile compressionFile) throws WorkflowDownloadStepException {
         try {
-            FileUtils.createParentDirectories(file);
+            var inputFile = Path.of(DOWNLOAD_PATH.toString(),
+                            compressionFile.mimeSuperType(),
+                            compressionFile.folderPath(),
+                            compressionFile.name())
+                    .toFile();
+            FileUtils.createParentDirectories(inputFile);
+            return inputFile;
         } catch (IOException e) {
-            throw new WorkflowCompressionStepException("Unable to create directories for: " + file.getAbsolutePath(), e);
+            throw new WorkflowDownloadStepException("Unable to create download file.", e);
+        }
+    }
+
+    private File createOutputFile(CompressionFile compressionFile) throws WorkflowUploadStepException {
+        try {
+            File outputFile = Path.of(UPLOAD_PATH.toString(),
+                            compressionFile.mimeSuperType(),
+                            compressionFile.name())
+                    .toFile();
+            FileUtils.createParentDirectories(outputFile);
+            return outputFile;
+        } catch (IOException e) {
+            throw new WorkflowUploadStepException("Unable to create upload file.", e);
         }
     }
 
     private void downloadMedia(CompressionFile compressionFile, File inputFile)
             throws WorkflowDownloadStepException {
-        File downloadFile = inputFile;
-        if (inputFile.exists()) {
-            try {
-                File duplicateDirectory = Path.of(inputFile.getParentFile().getPath(),
-                                FilenameUtils.getBaseName(inputFile.getName()))
-                        .toFile();
-                FileUtils.createParentDirectories(duplicateDirectory);
-                downloadFile = Path.of(duplicateDirectory.getPath(),
-                                compressionFile.id() + "-" + compressionFile.name())
-                        .toFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            LOGGER.warning("Download file already exists, duplicate file created at " + downloadFile.getAbsolutePath());
-        }
-
         try {
-            this.cloudClient.downloadFile(compressionFile, downloadFile);
+            this.cloudClient.downloadFile(compressionFile, inputFile);
         } catch (CloudClientDownloadException e) {
             throw new WorkflowDownloadStepException("Download from Google Drive failed", e);
         }
@@ -123,7 +118,7 @@ public class Workflow {
         CompressorStrategy compressor = CompressorFactory.getCompressorForMimeType(mimeSuperType);
         if (Objects.isNull(compressor)) {
             throw new WorkflowCompressionStepException(
-                    "Compressor strategy for MimeType not found: " + mimeSuperType);
+                    "Compressor strategy not found for MimeSuperType: " + mimeSuperType);
         }
         return compressor;
     }

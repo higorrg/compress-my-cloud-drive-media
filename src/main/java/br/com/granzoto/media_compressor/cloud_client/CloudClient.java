@@ -7,9 +7,10 @@ import br.com.granzoto.media_compressor.model.CompressionFile;
 
 public interface CloudClient {
 
-    public List<CompressionFile> listFiles() throws CloudClientListFilesException;
-    public void downloadFile(CompressionFile compressionFile, File inputFile) throws CloudClientDownloadException;
-    public void uploadFile(File outputFile, CompressionFile compressionFile) throws CloudClientUploadException;
-    public void delete(CompressionFile myFile) throws CloudClientDeleteException;
+    void addListObserver(CloudClietListItemObserver listItemObserver);
+    List<CompressionFile> listFiles() throws CloudClientListFilesException;
+    void downloadFile(CompressionFile compressionFile, File inputFile) throws CloudClientDownloadException;
+    void uploadFile(File outputFile, CompressionFile compressionFile) throws CloudClientUploadException;
+    void delete(CompressionFile myFile) throws CloudClientDeleteException;
 
 }
