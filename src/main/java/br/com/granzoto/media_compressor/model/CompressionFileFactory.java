@@ -23,13 +23,14 @@ public class CompressionFileFactory {
         if (!googleFile.containsKey("size") || !googleFile.containsKey("parents") || !googleFile.containsKey("mimeType")) {
             throw new IllegalArgumentException("Google file must have 'size', 'parents' and 'mimeType' extra fields");
         }
+        FileExtentionFixer.fixFileExtentionIfNull(googleFile);
         BigInteger size = BigInteger.valueOf(Long.parseLong(googleFile.get("size").toString()));
         String parentFolderId = googleFile.getParents() != null ? googleFile.getParents().getFirst() : null;
         String folderPath = resolveFullPath(parentFolderId, folderPaths);
         String mimeSuperType = extractMimeSuperType(googleFile.getMimeType());
-        java.io.File inputFile = createInputFile(googleFile, mimeSuperType, folderPath);
-        java.io.File outputFile = createOutputFile(googleFile, mimeSuperType, folderPath);
-        return new CompressionFile(googleFile.getId(), googleFile.getName(), size, folderPath, mimeSuperType,
+        java.io.File inputFile = createInputFile(googleFile, folderPath);
+        java.io.File outputFile = createOutputFile(googleFile, folderPath);
+        return new CompressionFile(googleFile.getId(), googleFile.getName(), size, folderPath, googleFile.getMimeType(), mimeSuperType,
                 inputFile, outputFile);
     }
 
@@ -56,7 +57,7 @@ public class CompressionFileFactory {
         return path.toString();
     }
 
-    static java.io.File createInputFile(File file, String mimeSuperType, String folderPath) throws IOException {
+    static java.io.File createInputFile(File file, String folderPath) throws IOException {
         var inputFile = Path.of(DOWNLOAD_PATH.toString(),
                         folderPath,
                         file.getName())
@@ -65,7 +66,7 @@ public class CompressionFileFactory {
         return inputFile;
     }
 
-    static java.io.File createOutputFile(File file, String mimeSuperType, String folderPath) throws IOException {
+    static java.io.File createOutputFile(File file, String folderPath) throws IOException {
         java.io.File outputFile = Path.of(UPLOAD_PATH.toString(),
                         folderPath,
                         file.getName())

@@ -134,7 +134,8 @@ public class GoogleDriveClient implements CloudClient {
             LOGGER.info("Uploading file: " + compressionFile.compressedFile().getName() + "; size: "
                     + FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(compressionFile.compressedFile())));
             var googleFile = new com.google.api.services.drive.model.File();
-            var mediaContent = new FileContent("video/mp4", compressionFile.compressedFile());
+            googleFile.setName(compressionFile.name());
+            var mediaContent = new FileContent(compressionFile.mimeType(), compressionFile.compressedFile());
             this.drive.files().update(compressionFile.id(), googleFile, mediaContent)
                     .setFields("id, name, mimeType")
                     .execute();
