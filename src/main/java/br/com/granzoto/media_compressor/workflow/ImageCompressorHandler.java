@@ -27,9 +27,9 @@ public class ImageCompressorHandler extends AbstractCloudClientHandler {
             boolean executeCompression = imageCompressor.executeCompression(compressionFile.originalFile(), compressionFile.compressedFile());
             if (executeCompression) {
                 this.nextItemHandler(compressionFile);
-            } else {
-                LOGGER.warning("Image compression failed");
             }
+        } else {
+            this.nextItemHandler(compressionFile);
         }
     }
 

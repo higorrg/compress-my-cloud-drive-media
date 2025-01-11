@@ -27,13 +27,12 @@ public class FFmpegImageCompressorWithHost implements CompressorStrategy {
 
             Process process = new ProcessBuilder().command(cmd).inheritIO().start();
             var exitCode = process.waitFor();
-            System.out.println("");
 
             if (exitCode == 0) {
                 LOGGER.info("Image compression successfully finished " + outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("Image not compressed. Exit code " + exitCode);
+                LOGGER.warning("Image compression failed: Exit code " + exitCode);
                 return false;
             }
         } catch (Exception e) {

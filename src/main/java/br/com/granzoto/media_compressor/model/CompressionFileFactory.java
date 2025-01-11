@@ -58,7 +58,6 @@ public class CompressionFileFactory {
 
     static java.io.File createInputFile(File file, String mimeSuperType, String folderPath) throws IOException {
         var inputFile = Path.of(DOWNLOAD_PATH.toString(),
-                        mimeSuperType,
                         folderPath,
                         file.getName())
                 .toFile();
@@ -68,7 +67,6 @@ public class CompressionFileFactory {
 
     static java.io.File createOutputFile(File file, String mimeSuperType, String folderPath) throws IOException {
         java.io.File outputFile = Path.of(UPLOAD_PATH.toString(),
-                        mimeSuperType,
                         folderPath,
                         file.getName())
                 .toFile();

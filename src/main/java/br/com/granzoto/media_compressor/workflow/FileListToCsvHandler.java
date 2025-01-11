@@ -18,7 +18,7 @@ public class FileListToCsvHandler extends AbstractCloudClientHandler {
     @Override
     public void handleStart(CloudClient cloudClient) {
         super.handleStart(cloudClient);
-        System.out.println("List only in progress");
+        System.out.println("List to CSV file started");
         File csvFile = Path.of("google-drive-files.csv").toFile();
         try {
             System.out.println("Writing CSV file " + csvFile.getAbsolutePath());
@@ -38,7 +38,6 @@ public class FileListToCsvHandler extends AbstractCloudClientHandler {
         line[3] = compressionFile.mimeSuperType();
         line[4] = compressionFile.size().toString();
         writer.writeNext(line);
-        System.out.println(Arrays.toString(line));
         this.nextItemHandler(compressionFile);
     }
 

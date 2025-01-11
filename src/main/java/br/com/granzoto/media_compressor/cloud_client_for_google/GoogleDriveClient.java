@@ -106,8 +106,7 @@ public class GoogleDriveClient implements CloudClient {
                         (mimeType='application/vnd.google-apps.folder' or
                         mimeType contains 'video/' or
                         mimeType contains 'image/') and
-                        modifiedTime < '2024-01-04T00:00:00' and
-                        modifiedTime > '2024-01-09T00:00:00' 
+                        modifiedTime < '2024-01-04T00:00:00'
                         """)
                 .setSpaces("drive")
                 .setPageSize(PAGE_SIZE)

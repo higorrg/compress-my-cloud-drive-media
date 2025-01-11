@@ -21,6 +21,7 @@ public class FileListToLogHandler extends AbstractCloudClientHandler {
 
     @Override
     public void handleItem(CompressionFile compressionFile) {
+        LOGGER.info("");
         LOGGER.info(compressionFile.toString());
         this.nextItemHandler(compressionFile);
     }

@@ -26,9 +26,9 @@ public class VideoCompressorHandler extends AbstractCloudClientHandler {
             boolean executeCompression = videoCompressor.executeCompression(compressionFile.originalFile(), compressionFile.compressedFile());
             if (executeCompression) {
                 this.nextItemHandler(compressionFile);
-            } else {
-                LOGGER.warning("Video compression failed");
             }
+        } else {
+            this.nextItemHandler(compressionFile);
         }
     }
 

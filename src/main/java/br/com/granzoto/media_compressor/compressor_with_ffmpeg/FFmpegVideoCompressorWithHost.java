@@ -16,10 +16,10 @@ public class FFmpegVideoCompressorWithHost implements CompressorStrategy {
             String[] cmd = {"ffmpeg",
                     "-y",
                     "-loglevel", "quiet",
-                    "-i", inputFile.getAbsolutePath().replaceAll(" ", " "),
+                    "-i", inputFile.getAbsolutePath().replaceAll(" ", "\\ "),
                     "-c:v", "h264",
                     "-c:a", "copy",
-                    outputFile.getAbsolutePath().replaceAll(" ", " ")};
+                    outputFile.getAbsolutePath().replaceAll(" ", "\\ ")};
             LOGGER.info(Arrays.toString(cmd));
 
             Process process = new ProcessBuilder().command(cmd).inheritIO().start();
@@ -30,7 +30,7 @@ public class FFmpegVideoCompressorWithHost implements CompressorStrategy {
                 LOGGER.info("Video compression successfully finished " + outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("Vídeo not compressed. Exit code " + exitCode);
+                LOGGER.warning("Video compression failed: Exit code " + exitCode);
                 return false;
             }
         } catch (Exception e) {
