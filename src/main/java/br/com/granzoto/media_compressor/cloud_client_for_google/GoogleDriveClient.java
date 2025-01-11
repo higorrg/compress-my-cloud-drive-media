@@ -1,6 +1,7 @@
 package br.com.granzoto.media_compressor.cloud_client_for_google;
 
 import br.com.granzoto.media_compressor.cloud_client.*;
+import br.com.granzoto.media_compressor.workflow.FirstCloudClientHandler;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import br.com.granzoto.media_compressor.model.CompressionFileFactory;
 import br.com.granzoto.media_compressor.model.FolderInfo;
@@ -13,7 +14,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,7 +34,7 @@ public class GoogleDriveClient implements CloudClient {
 
     private final Drive drive;
 
-    private final List<CloudClietListItemObserver> listItemObservers = new ArrayList<>();
+    private final CloudClientHandler firstHandler = new FirstCloudClientHandler();
 
     public static synchronized GoogleDriveClient getInstance() {
         if (instance == null) {
@@ -60,18 +60,17 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     @Override
-    public void addListObserver(CloudClietListItemObserver listItemObserver) {
-        this.listItemObservers.add(listItemObserver);
+    public void addHandler(CloudClientHandler handler) {
+        this.firstHandler.link(handler);
     }
 
     @Override
-    public List<CompressionFile> listFiles() throws CloudClientListFilesException {
-        this.listItemObservers.forEach(o -> o.notifyStart(this));
+    public void runFiles() throws CloudClientListFilesException {
+        this.firstHandler.handleStart(this);
         Map<String, FolderInfo> folderPaths = new HashMap<>();
         List<CompressionFile> files = new ArrayList<>();
         this.listFilesByPage(null, folderPaths, files);
-        this.listItemObservers.forEach(o -> o.notifyEnd(files));
-        return files;
+        this.firstHandler.handleEnd(files);
     }
 
     private void listFilesByPage(String page, Map<String, FolderInfo> folderPaths, List<CompressionFile> files)
@@ -79,16 +78,16 @@ public class GoogleDriveClient implements CloudClient {
         try {
             FileList googleDriveFiles = getFileList(page);
 
-            googleDriveFiles.getFiles().forEach(googleFile -> {
+            for (var googleFile : googleDriveFiles.getFiles()) {
                 if (APPLICATION_VND_GOOGLE_APPS_FOLDER.equals(googleFile.getMimeType())) {
                     String parentId = !Objects.isNull(googleFile.getParents()) ? googleFile.getParents().getFirst() : null;
                     folderPaths.put(googleFile.getId(), new FolderInfo(googleFile.getName(), parentId));
                 } else {
                     CompressionFile compressionFile = CompressionFileFactory.createCompressionFileFromGoogleFile(googleFile, folderPaths);
                     files.add(compressionFile);
-                    this.listItemObservers.forEach(o -> o.notifyItem(compressionFile));
+                    this.firstHandler.handleItem(compressionFile);
                 }
-            });
+            };
 
             String nextPageToken = googleDriveFiles.getNextPageToken();
             if (nextPageToken != null) {
@@ -107,7 +106,8 @@ public class GoogleDriveClient implements CloudClient {
                         (mimeType='application/vnd.google-apps.folder' or
                         mimeType contains 'video/' or
                         mimeType contains 'image/') and
-                        modifiedTime < '2024-01-04T00:00:00'
+                        modifiedTime < '2024-01-04T00:00:00' and
+                        modifiedTime > '2024-01-09T00:00:00' 
                         """)
                 .setSpaces("drive")
                 .setPageSize(PAGE_SIZE)
@@ -118,9 +118,9 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     @Override
-    public void downloadFile(CompressionFile compressionFile, File inputFile)
+    public void downloadFile(CompressionFile compressionFile)
             throws CloudClientDownloadException {
-        try (OutputStream outputStream = new FileOutputStream(inputFile)) {
+        try (OutputStream outputStream = new FileOutputStream(compressionFile.originalFile())) {
             LOGGER.info("Downloading file: " + compressionFile.name());
             this.drive.files().get(compressionFile.id()).executeMediaAndDownloadTo(outputStream);
             LOGGER.info("Download successfully finished");
@@ -130,12 +130,12 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     @Override
-    public void uploadFile(File outputFile, CompressionFile compressionFile) throws CloudClientUploadException {
+    public void uploadFile(CompressionFile compressionFile) throws CloudClientUploadException {
         try {
-            LOGGER.info("Uploading file: " + outputFile.getName() + "; size: "
-                    + FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(outputFile)));
+            LOGGER.info("Uploading file: " + compressionFile.compressedFile().getName() + "; size: "
+                    + FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(compressionFile.compressedFile())));
             var googleFile = new com.google.api.services.drive.model.File();
-            var mediaContent = new FileContent("video/mp4", outputFile);
+            var mediaContent = new FileContent("video/mp4", compressionFile.compressedFile());
             this.drive.files().update(compressionFile.id(), googleFile, mediaContent)
                     .setFields("id, name, mimeType")
                     .execute();
@@ -145,13 +145,4 @@ public class GoogleDriveClient implements CloudClient {
         }
     }
 
-    @Override
-    public void delete(CompressionFile myFile) throws CloudClientDeleteException {
-        try {
-            this.drive.files().delete(myFile.id()).execute();
-            LOGGER.info("File successfully deleted " + myFile.name());
-        } catch (IOException e) {
-            throw new CloudClientDeleteException("Delete Google Drive file failed: " + myFile.name(), e);
-        }
-    }
 }

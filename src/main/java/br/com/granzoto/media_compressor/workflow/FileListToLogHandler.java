@@ -1,8 +1,6 @@
-package br.com.granzoto.media_compressor.cloud_client_observer;
+package br.com.granzoto.media_compressor.workflow;
 
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
-import br.com.granzoto.media_compressor.cloud_client.CloudClietListItemObserver;
-import br.com.granzoto.media_compressor.cloud_client_for_google.GoogleDriveClient;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import org.apache.commons.io.FileUtils;
 
@@ -10,22 +8,26 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class CloudClientListItemObserverForLog implements CloudClietListItemObserver {
+public class FileListToLogHandler extends AbstractCloudClientHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(CloudClientListItemObserverForLog.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FileListToLogHandler.class.getName());
 
     @Override
-    public void notifyStart(CloudClient cloudClient) {
+    public void handleStart(CloudClient cloudClient) {
+        super.handleStart(cloudClient);
         LOGGER.info("Listing media files from your Google Drive");
+        this.nextStartHandler(cloudClient);
     }
 
     @Override
-    public void notifyItem(CompressionFile compressionFile) {
+    public void handleItem(CompressionFile compressionFile) {
         LOGGER.info(compressionFile.toString());
+        this.nextItemHandler(compressionFile);
     }
 
     @Override
-    public void notifyEnd(List<CompressionFile> files) {
+    public void handleEnd(List<CompressionFile> files) {
+        super.handleEnd(files);
         BigInteger totalSize = files.stream()
                 .map(CompressionFile::size)
                 .reduce(BigInteger.ZERO, BigInteger::add);
@@ -33,5 +35,6 @@ public class CloudClientListItemObserverForLog implements CloudClietListItemObse
         LOGGER.info("Total size: " + FileUtils.byteCountToDisplaySize(totalSize));
         LOGGER.info("Total items: " + files.size());
         LOGGER.info("");
+        this.nextEndHandler(files);
     }
 }

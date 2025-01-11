@@ -1,39 +1,30 @@
 package br.com.granzoto.media_compressor.compressor_with_ffmpeg;
 
+import br.com.granzoto.media_compressor.compressor_strategy.CompressorStrategy;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Logger;
-
-import br.com.granzoto.media_compressor.compressor_strategy.CompressorStrategy;
 
 public class FFmpegVideoCompressorWithHost implements CompressorStrategy {
 
     private static final Logger LOGGER = Logger.getLogger(FFmpegVideoCompressorWithHost.class.getName());
 
-    public static synchronized FFmpegVideoCompressorWithHost getInstance() {
-        return new FFmpegVideoCompressorWithHost();
-    }
-
     @Override
     public boolean executeCompression(File inputFile, File outputFile) {
         try {
-            String[] cmd = { "ffmpeg",
+            String[] cmd = {"ffmpeg",
                     "-y",
                     "-loglevel", "quiet",
-                    "-i", inputFile.getAbsolutePath().replaceAll(" ", "\\ "),
-                    // "-c:v", "libvvenc",
+                    "-i", inputFile.getAbsolutePath().replaceAll(" ", " "),
                     "-c:v", "h264",
                     "-c:a", "copy",
-                    // "-crf", "28",
-                    // "-vf", "scale=1280:-1",
-                    // "-preset","fast",
-                    // "-qp","21",
-                    outputFile.getAbsolutePath().replaceAll(" ", "\\ ") };
+                    outputFile.getAbsolutePath().replaceAll(" ", " ")};
             LOGGER.info(Arrays.toString(cmd));
 
             Process process = new ProcessBuilder().command(cmd).inheritIO().start();
             var exitCode = process.waitFor();
-            System.out.println("");
+            System.out.println();
 
             if (exitCode == 0) {
                 LOGGER.info("Video compression successfully finished " + outputFile.getName());
