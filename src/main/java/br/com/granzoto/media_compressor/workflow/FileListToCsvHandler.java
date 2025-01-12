@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 
 public class FileListToCsvHandler extends AbstractCloudClientHandler {
@@ -23,22 +22,39 @@ public class FileListToCsvHandler extends AbstractCloudClientHandler {
         try {
             System.out.println("Writing CSV file " + csvFile.getAbsolutePath());
             writer = new CSVWriter(new FileWriter(csvFile));
+            writeHeaderColumns();
             this.nextStartHandler(cloudClient);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private void writeHeaderColumns() {
+        String[] header = new String[6];
+        header[0] = "Id";
+        header[1] = "Name";
+        header[2] = "Folder";
+        header[3] = "MimeType";
+        header[4] = "MimeSuperType";
+        header[5] = "Size";
+        writer.writeNext(header);
+    }
+
     @Override
     public void handleItem(CompressionFile compressionFile) {
-        String[] line = new String[5];
+        writeLineItem(compressionFile);
+        this.nextItemHandler(compressionFile);
+    }
+
+    private void writeLineItem(CompressionFile compressionFile) {
+        String[] line = new String[6];
         line[0] = compressionFile.id();
         line[1] = compressionFile.name();
         line[2] = compressionFile.folderPath();
-        line[3] = compressionFile.mimeSuperType();
-        line[4] = compressionFile.size().toString();
+        line[3] = compressionFile.mimeType();
+        line[4] = compressionFile.mimeSuperType();
+        line[5] = compressionFile.size().toString();
         writer.writeNext(line);
-        this.nextItemHandler(compressionFile);
     }
 
     @Override
