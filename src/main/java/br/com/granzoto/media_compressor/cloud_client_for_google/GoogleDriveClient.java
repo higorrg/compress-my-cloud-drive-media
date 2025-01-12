@@ -60,8 +60,9 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     @Override
-    public void addHandler(CloudClientHandler handler) {
+    public CloudClient addHandler(CloudClientHandler handler) {
         this.firstHandler.link(handler);
+        return this;
     }
 
     @Override
