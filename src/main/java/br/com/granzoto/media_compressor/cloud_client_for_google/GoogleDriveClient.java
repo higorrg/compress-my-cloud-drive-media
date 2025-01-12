@@ -128,6 +128,14 @@ public class GoogleDriveClient implements CloudClient {
         }
     }
 
+    /**
+     * It's important to note that set the name is not mandatory on upload,
+     * but it's done to assure what @{@link br.com.granzoto.media_compressor.model.FileExtensionFixer}
+     * meant to fix.
+     * @see br.com.granzoto.media_compressor.model.FileExtensionFixer
+     * @param compressionFile
+     * @throws CloudClientUploadException
+     */
     @Override
     public void uploadFile(CompressionFile compressionFile) throws CloudClientUploadException {
         try {

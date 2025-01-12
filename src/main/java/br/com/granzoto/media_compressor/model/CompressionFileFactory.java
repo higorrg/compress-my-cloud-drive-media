@@ -23,7 +23,7 @@ public class CompressionFileFactory {
         if (!googleFile.containsKey("size") || !googleFile.containsKey("parents") || !googleFile.containsKey("mimeType")) {
             throw new IllegalArgumentException("Google file must have 'size', 'parents' and 'mimeType' extra fields");
         }
-        FileExtentionFixer.fixFileExtentionIfNull(googleFile);
+        FileExtensionFixer.fixFileExtensionIfNull(googleFile);
         BigInteger size = BigInteger.valueOf(Long.parseLong(googleFile.get("size").toString()));
         String parentFolderId = googleFile.getParents() != null ? googleFile.getParents().getFirst() : null;
         String folderPath = resolveFullPath(parentFolderId, folderPaths);

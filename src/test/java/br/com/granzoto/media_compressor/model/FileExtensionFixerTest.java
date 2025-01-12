@@ -5,24 +5,24 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileExtentionFixerTest {
+class FileExtensionFixerTest {
 
     @Test
-    void testFixFileExtentionIfNull_AddsExtentionWhenMissing() {
+    void testFixFileExtentionIfNull_AddsExtensionWhenMissing() {
         // Arrange
         File googleFile = new File();
         googleFile.setName("example");
         googleFile.setMimeType("video/mp4");
 
         // Act
-        FileExtentionFixer.fixFileExtentionIfNull(googleFile);
+        FileExtensionFixer.fixFileExtensionIfNull(googleFile);
 
         // Assert
         assertEquals("example.mp4", googleFile.getName(), "The file extension should be added to the file name.");
     }
 
     @Test
-    void testFixFileExtentionIfNull_LeavesNameUnchangedWhenExtensionExists() {
+    void testFixFileExtensionIfNull_LeavesNameUnchangedWhenExtensionExists() {
         // Arrange
         File googleFile = new File();
         googleFile.setName("example.mp4");
@@ -30,26 +30,26 @@ class FileExtentionFixerTest {
         googleFile.setFileExtension("mp4");
 
         // Act
-        FileExtentionFixer.fixFileExtentionIfNull(googleFile);
+        FileExtensionFixer.fixFileExtensionIfNull(googleFile);
 
         // Assert
         assertEquals("example.mp4", googleFile.getName(), "The file name should remain unchanged.");
     }
 
     @Test
-    void testExtractFileExtentionFromMimeType_ValidMimeType() {
+    void testExtractFileExtensionFromMimeType_ValidMimeType() {
         // Act
-        String fileExtension = FileExtentionFixer.extractFileExtentionFromMimeType("video/mp4");
+        String fileExtension = FileExtensionFixer.extractFileExtensionFromMimeType("video/mp4");
 
         // Assert
         assertEquals("mp4", fileExtension, "The file extension should be correctly extracted from the MIME type.");
     }
 
     @Test
-    void testExtractFileExtentionFromMimeType_EmptyMimeType() {
+    void testExtractFileExtensionFromMimeType_EmptyMimeType() {
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () ->
-                FileExtentionFixer.extractFileExtentionFromMimeType("")
+                FileExtensionFixer.extractFileExtensionFromMimeType("")
         );
     }
 }

@@ -6,15 +6,19 @@ import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class FileExtentionFixer {
+/**
+ * When the file has no extension, ffmpeg fails on probing the mime type.
+ * So, we need to redefine the name of the file to avoid ffmpeg to fail.
+ */
+public class FileExtensionFixer {
 
-    static void fixFileExtentionIfNull(File googleFile) {
+    static void fixFileExtensionIfNull(File googleFile) {
         if (Strings.isNullOrEmpty(googleFile.getFileExtension())){
-            googleFile.setName(googleFile.getName()+"."+extractFileExtentionFromMimeType(googleFile.getMimeType()));
+            googleFile.setName(googleFile.getName()+"."+ extractFileExtensionFromMimeType(googleFile.getMimeType()));
         }
     }
 
-    static String extractFileExtentionFromMimeType(String mimeType){
+    static String extractFileExtensionFromMimeType(String mimeType){
         if (Strings.isNullOrEmpty(mimeType)){
             throw new IllegalArgumentException("MimeType required");
         }
