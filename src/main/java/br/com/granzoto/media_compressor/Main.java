@@ -2,8 +2,8 @@ package br.com.granzoto.media_compressor;
 
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientListFilesException;
-import br.com.granzoto.media_compressor.cloud_client_for_google.GoogleDriveClient;
-import br.com.granzoto.media_compressor.workflow.*;
+import br.com.granzoto.media_compressor.workflow.CloudClientFactory;
+import br.com.granzoto.media_compressor.workflow.HandlerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -51,10 +51,11 @@ public class Main implements Callable<Integer> {
 
     @Override
     public Integer call() throws CloudClientListFilesException {
-        CloudClient cloudClient = getCloudClient(driveInstance);
+        var cloudClientFactory = new CloudClientFactory();
+        CloudClient cloudClient = cloudClientFactory.getCloudClient(driveInstance);
 
-        HandlerFactory handlerFactory = new HandlerFactory();
-        handlerFactory.configureCloudClientHandlers(cloudClient, Map.of(
+        var handlerFactory = new HandlerFactory();
+        handlerFactory.createCloudClientHandlers(cloudClient, Map.of(
                 "logHandler", logHandler,
                 "csvHandler", csvHandler,
                 "downloadHandler", downloadHandler,
@@ -67,12 +68,4 @@ public class Main implements Callable<Integer> {
         return 0;
     }
 
-    private CloudClient getCloudClient(String driveInstance) {
-        return switch (driveInstance.toLowerCase()) {
-            case "google" -> GoogleDriveClient.getInstance();
-//            case "onedrive" -> OneDriveClient.getInstance();
-//            case "dropbox" -> DropboxClient.getInstance();
-            default -> throw new IllegalArgumentException("Unsupported cloud client type: " + driveInstance);
-        };
-    }
 }

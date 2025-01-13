@@ -8,6 +8,7 @@ br/com/granzoto/media_compressor/compressor_strategy/CompressorStrategy.class
 br/com/granzoto/media_compressor/cloud_client/CloudClient.class
 br/com/granzoto/media_compressor/compressor_with_ffmpeg/FFmpegVideoCompressorWithHost.class
 br/com/granzoto/media_compressor/model/FolderInfo.class
+br/com/granzoto/media_compressor/workflow/HandlerFactory.class
 br/com/granzoto/media_compressor/workflow/ImageCompressorHandler.class
 br/com/granzoto/media_compressor/workflow/FileListToLogHandler.class
 br/com/granzoto/media_compressor/model/CompressionFile.class
