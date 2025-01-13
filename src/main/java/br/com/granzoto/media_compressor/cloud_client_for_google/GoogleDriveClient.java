@@ -61,6 +61,9 @@ public class GoogleDriveClient implements CloudClient {
 
     @Override
     public CloudClient addHandler(CloudClientHandler handler) {
+        if (Objects.isNull(handler)){
+            throw new IllegalArgumentException("Cloud client handler can't be null");
+        }
         this.firstHandler.link(handler);
         return this;
     }
