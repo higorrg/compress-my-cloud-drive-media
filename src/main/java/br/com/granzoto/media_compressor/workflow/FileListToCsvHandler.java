@@ -3,15 +3,19 @@ package br.com.granzoto.media_compressor.workflow;
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import com.opencsv.CSVWriter;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class FileListToCsvHandler extends AbstractCloudClientHandler {
 
+    private static final Logger LOGGER = Logger.getLogger(FileListToCsvHandler.class.getName());
     private CSVWriter writer;
 
     @Override
@@ -62,6 +66,13 @@ public class FileListToCsvHandler extends AbstractCloudClientHandler {
         super.handleEnd(files);
         try {
             writer.close();
+            BigInteger totalSize = files.stream()
+                    .map(CompressionFile::size)
+                    .reduce(BigInteger.ZERO, BigInteger::add);
+            LOGGER.info("");
+            LOGGER.info("Total size: " + FileUtils.byteCountToDisplaySize(totalSize));
+            LOGGER.info("Total items: " + files.size());
+            LOGGER.info("");
             this.nextEndHandler(files);
         } catch (IOException e) {
             throw new RuntimeException(e);

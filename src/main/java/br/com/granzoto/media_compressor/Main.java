@@ -23,11 +23,14 @@ public class Main implements Callable<Integer> {
     @Option(names = "--csv", description = "Create CSV file with file data.")
     boolean csvHandler;
 
-    @Option(names = "--video-compressor", description = "Compress videos.")
+    @Option(names = "--video", description = "Compress videos.")
     boolean videoCompressorHandler;
 
-    @Option(names = "--image-compressor", description = "Compress images.")
+    @Option(names = "--image", description = "Compress images.")
     boolean imageCompressorHandler;
+
+    @Option(names = "--pdf", description = "Compress PDF.")
+    boolean pdfCompressorHandler;
 
     @Option(names = "--download", description = "Enable the DownloadHandler.")
     boolean downloadHandler;
@@ -61,6 +64,7 @@ public class Main implements Callable<Integer> {
                 "downloadHandler", downloadHandler,
                 "videoCompressorHandler", videoCompressorHandler,
                 "imageCompressorHandler", imageCompressorHandler,
+                "pdfCompressorHandler", pdfCompressorHandler,
                 "uploadHandler", uploadHandler
         ));
 

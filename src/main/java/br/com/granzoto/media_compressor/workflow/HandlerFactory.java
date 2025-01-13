@@ -31,6 +31,7 @@ public class HandlerFactory {
         handlerCreators.put("downloadHandler", client -> client.addHandler(new DownloadHandler()));
         handlerCreators.put("videoCompressorHandler", client -> client.addHandler(new VideoCompressorHandler()));
         handlerCreators.put("imageCompressorHandler", client -> client.addHandler(new ImageCompressorHandler()));
+        handlerCreators.put("pdfCompressorHandler", client -> client.addHandler(new PdfCompressorHandler()));
         handlerCreators.put("uploadHandler", client -> client.addHandler(new UploadHandler()));
     }
 
