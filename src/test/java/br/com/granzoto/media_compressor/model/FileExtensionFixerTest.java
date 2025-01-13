@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FileExtensionFixerTest {
 
     @Test
-    void testFixFileExtentionIfNull_AddsExtensionWhenMissing() {
+    void testFixFileExtentionIfNull_AddsExtensionWhenMp4IsMissing() {
         // Arrange
         File googleFile = new File();
         googleFile.setName("example");
@@ -22,18 +22,31 @@ class FileExtensionFixerTest {
     }
 
     @Test
-    void testFixFileExtensionIfNull_LeavesNameUnchangedWhenExtensionExists() {
+    void testFixFileExtensionIfNull_LeavesNameUnchangedWhenMp4ExtensionExists() {
         // Arrange
         File googleFile = new File();
         googleFile.setName("example.mp4");
         googleFile.setMimeType("video/mp4");
-        googleFile.setFileExtension("mp4");
 
         // Act
         FileExtensionFixer.fixFileExtensionIfNull(googleFile);
 
         // Assert
         assertEquals("example.mp4", googleFile.getName(), "The file name should remain unchanged.");
+    }
+
+    @Test
+    void testFixFileExtensionIfNull_LeavesNameUnchangedWhenPdfExtensionExists() {
+        // Arrange
+        File googleFile = new File();
+        googleFile.setName("example.pdf");
+        googleFile.setMimeType("application/pdf");
+
+        // Act
+        FileExtensionFixer.fixFileExtensionIfNull(googleFile);
+
+        // Assert
+        assertEquals("example.pdf", googleFile.getName(), "The file name should remain unchanged.");
     }
 
     @Test
