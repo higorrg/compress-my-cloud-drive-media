@@ -48,11 +48,11 @@ public class ImageCompressorHandler extends AbstractCloudClientHandler {
                 LOGGER.info("Image compression successfully finished " + outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("Image compression failed: Exit code " + exitCode);
+                LOGGER.warning("Image compression failed: Exit code " + exitCode+". File: "+inputFile.getAbsolutePath());
                 return false;
             }
         } catch (Exception e) {
-            LOGGER.severe("Image compression failed: " + e.getMessage());
+            LOGGER.severe("Image compression failed: " + e.getMessage()+". File: "+inputFile.getAbsolutePath());
             return false;
         }
     }

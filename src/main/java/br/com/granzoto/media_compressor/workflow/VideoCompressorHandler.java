@@ -50,11 +50,11 @@ public class VideoCompressorHandler extends AbstractCloudClientHandler {
                 LOGGER.info("Video compression successfully finished " + outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("Video compression failed: Exit code " + exitCode);
+                LOGGER.warning("Video compression failed: Exit code " + exitCode+". File: "+inputFile.getAbsolutePath());
                 return false;
             }
         } catch (Exception e) {
-            LOGGER.severe("Video compression failed: " + e.getMessage());
+            LOGGER.severe("Video compression failed: " + e.getMessage()+". File: "+inputFile.getAbsolutePath());
             return false;
         }
     }

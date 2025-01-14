@@ -41,11 +41,11 @@ public class PdfCompressorHandler extends AbstractCloudClientHandler {
                 LOGGER.info("PDF compression successfully finished " + outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("PDF compression failed: Exit code " + exitCode);
+                LOGGER.warning("PDF compression failed: Exit code " + exitCode+". File: "+inputFile.getAbsolutePath());
                 return false;
             }
         } catch (Exception e) {
-            LOGGER.severe("PDF compression failed: " + e.getMessage());
+            LOGGER.severe("PDF compression failed: " + e.getMessage()+". File: "+inputFile.getAbsolutePath());
             return false;
         }
     }
