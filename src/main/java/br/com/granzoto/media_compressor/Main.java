@@ -36,8 +36,8 @@ public class Main implements Callable<Integer> {
     @Option(names = "--upload", description = "Enable the UploadHandler.")
     boolean uploadHandler;
 
-    @Option(names = "--cloud-drive", description = "Connect to cloud drive.", defaultValue = "google", required = true)
-    String driveInstance;
+    @Option(names = "--cloud-drive", description = "Connect to cloud drive. Options are: 'Google'", required = true)
+    String cloudDriveName;
 
     public static void main(String... args) {
         int exitCode = new CommandLine(new Main()).execute(args);
@@ -47,7 +47,7 @@ public class Main implements Callable<Integer> {
     @Override
     public Integer call() throws CloudClientListFilesException {
         var cloudClientFactory = new CloudClientFactory();
-        CloudClient cloudClient = cloudClientFactory.getCloudClient(driveInstance);
+        CloudClient cloudClient = cloudClientFactory.getCloudClient(cloudDriveName);
 
         var handlerFactory = new HandlerFactory();
         handlerFactory.createCloudClientHandlers(cloudClient, Map.of(

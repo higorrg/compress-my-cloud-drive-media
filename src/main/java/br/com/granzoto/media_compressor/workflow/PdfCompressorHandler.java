@@ -1,11 +1,11 @@
 package br.com.granzoto.media_compressor.workflow;
 
 import br.com.granzoto.media_compressor.model.CompressionFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PdfCompressorHandler extends AbstractCloudClientHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PdfCompressorHandler.class.getName());
@@ -17,6 +17,13 @@ public class PdfCompressorHandler extends AbstractCloudClientHandler {
             boolean executeCompression = this.executeCompression(compressionFile.originalFile(), compressionFile.compressedFile());
             if (executeCompression) {
                 this.nextItemHandler(compressionFile);
+            } else if (compressionFile.compressedFile().exists()){
+                if (!compressionFile.compressedFile().delete()){
+                    LOGGER.warn("Fail deleting invalid compressed file {}. Will try to delete on JVM exit", compressionFile.compressedFile().getAbsolutePath());
+                    compressionFile.compressedFile().deleteOnExit();
+                } else {
+                    LOGGER.info("Invalid compressed file successfully deleted {}", compressionFile.compressedFile().getAbsolutePath());
+                }
             }
         } else {
             this.nextItemHandler(compressionFile);
@@ -26,9 +33,10 @@ public class PdfCompressorHandler extends AbstractCloudClientHandler {
     private boolean executeCompression(File inputFile, File outputFile) {
         try {
             String[] cmd = {"gs",
+                    "-q",
                     "-sDEVICE=pdfwrite",
                     "-dCompatibilityLevel=1.4",
-                    "-dPDFSETTINGS=/screen",
+                    "-dPDFSETTINGS=/printer",
                     "-dNOPAUSE",
                     "-dBATCH",
                     "-sOutputFile=" + outputFile.getAbsolutePath().replaceAll(" ", "\\ "),

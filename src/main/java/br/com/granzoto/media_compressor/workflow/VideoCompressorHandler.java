@@ -26,6 +26,13 @@ public class VideoCompressorHandler extends AbstractCloudClientHandler {
             boolean executeCompression = this.executeCompression(compressionFile.originalFile(), compressionFile.compressedFile());
             if (executeCompression) {
                 this.nextItemHandler(compressionFile);
+            } else if (compressionFile.compressedFile().exists()){
+                if (!compressionFile.compressedFile().delete()){
+                    LOGGER.warn("Fail deleting invalid compressed file {}. Will try to delete on JVM exit", compressionFile.compressedFile().getAbsolutePath());
+                    compressionFile.compressedFile().deleteOnExit();
+                } else {
+                    LOGGER.info("Invalid compressed file successfully deleted {}", compressionFile.compressedFile().getAbsolutePath());
+                }
             }
         } else {
             this.nextItemHandler(compressionFile);

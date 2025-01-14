@@ -30,7 +30,7 @@ public class GoogleDriveClient extends AbstractCloudClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleDriveClient.class.getName());
     private static final String APPLICATION_NAME = "Compress My Google Drive Media";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final int PAGE_SIZE = 50;
+    private static final int PAGE_SIZE = 1000;
     private static final String APPLICATION_VND_GOOGLE_APPS_FOLDER = "application/vnd.google-apps.folder";
     private static GoogleDriveClient instance;
 
