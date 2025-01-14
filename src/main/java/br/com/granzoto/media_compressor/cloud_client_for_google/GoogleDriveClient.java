@@ -61,12 +61,11 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     @Override
-    public CloudClient addHandler(CloudClientHandler handler) {
+    public void addHandler(CloudClientHandler handler) {
         if (Objects.isNull(handler)){
             throw new IllegalArgumentException("Cloud client handler can't be null");
         }
         this.firstHandler.link(handler);
-        return this;
     }
 
     @Override
@@ -92,7 +91,7 @@ public class GoogleDriveClient implements CloudClient {
                     files.add(compressionFile);
                     this.firstHandler.handleItem(compressionFile);
                 }
-            };
+            }
 
             String nextPageToken = googleDriveFiles.getNextPageToken();
             if (nextPageToken != null) {
