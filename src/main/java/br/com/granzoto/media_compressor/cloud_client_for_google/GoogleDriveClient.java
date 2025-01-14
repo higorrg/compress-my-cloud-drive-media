@@ -3,7 +3,6 @@ package br.com.granzoto.media_compressor.cloud_client_for_google;
 import br.com.granzoto.media_compressor.cloud_client.*;
 import br.com.granzoto.media_compressor.workflow.FirstCloudClientHandler;
 import br.com.granzoto.media_compressor.model.CompressionFile;
-import br.com.granzoto.media_compressor.model.CompressionFileFactory;
 import br.com.granzoto.media_compressor.model.FolderInfo;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.FileContent;
@@ -87,7 +86,7 @@ public class GoogleDriveClient implements CloudClient {
                     String parentId = !Objects.isNull(googleFile.getParents()) ? googleFile.getParents().getFirst() : null;
                     folderPaths.put(googleFile.getId(), new FolderInfo(googleFile.getName(), parentId));
                 } else {
-                    CompressionFile compressionFile = CompressionFileFactory.createCompressionFileFromGoogleFile(googleFile, folderPaths);
+                    CompressionFile compressionFile = CompressionFileFromGoogleFileFactory.createCompressionFile(googleFile, folderPaths);
                     files.add(compressionFile);
                     this.firstHandler.handleItem(compressionFile);
                 }

@@ -1,14 +1,15 @@
-package br.com.granzoto.media_compressor.model;
+package br.com.granzoto.media_compressor.cloud_client_for_google;
 
+import br.com.granzoto.media_compressor.model.*;
 import com.google.api.services.drive.model.File;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Map;
 
-public class CompressionFileFactory {
+public class CompressionFileFromGoogleFileFactory {
 
-    public static CompressionFile createCompressionFileFromGoogleFile(File googleFile, Map<String, FolderInfo> folderPaths) throws IOException {
+    public static CompressionFile createCompressionFile(File googleFile, Map<String, FolderInfo> folderPaths) throws IOException {
         if (!googleFile.containsKey("size") || !googleFile.containsKey("parents") || !googleFile.containsKey("mimeType")) {
             throw new IllegalArgumentException("Google file must have 'size', 'parents' and 'mimeType' fields");
         }

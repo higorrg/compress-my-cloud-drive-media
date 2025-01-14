@@ -19,7 +19,7 @@ public class FileExtensionFixer {
      *
      * @return The filename with extension
      **/
-    static String fixFileExtensionIfNull(String currentFileName, String mimeType) {
+    public static String fixFileExtensionIfNull(String currentFileName, String mimeType) {
         if (Strings.isNullOrEmpty(FilenameUtils.getExtension(currentFileName))){
             return currentFileName+"."+ extractFileExtensionFromMimeType(mimeType);
         }
