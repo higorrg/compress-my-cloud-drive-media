@@ -20,6 +20,7 @@ public class FirstCloudClientHandler extends AbstractCloudClientHandler {
 
     @Override
     public void handleEnd(List<CompressionFile> files) {
+        super.handleEnd(files);
         this.nextEndHandler(files);
     }
 }
