@@ -19,11 +19,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GoogleDriveClient implements CloudClient {
 
-    private static final Logger LOGGER = Logger.getLogger(GoogleDriveClient.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleDriveClient.class.getName());
 
     private static final String APPLICATION_NAME = "Compress My Google Drive Media";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
@@ -125,7 +126,7 @@ public class GoogleDriveClient implements CloudClient {
     public void downloadFile(CompressionFile compressionFile)
             throws CloudClientDownloadException {
         try (OutputStream outputStream = new FileOutputStream(compressionFile.originalFile())) {
-            LOGGER.info("Downloading file: " + compressionFile.name());
+            LOGGER.info("Downloading file: {}", compressionFile.name());
             this.drive.files().get(compressionFile.id()).executeMediaAndDownloadTo(outputStream);
             LOGGER.info("Download successfully finished");
         } catch (IOException e) {
@@ -138,14 +139,13 @@ public class GoogleDriveClient implements CloudClient {
      * but it's done to assure what @{@link br.com.granzoto.media_compressor.model.FileExtensionFixer}
      * meant to fix.
      * @see br.com.granzoto.media_compressor.model.FileExtensionFixer
-     * @param compressionFile
-     * @throws CloudClientUploadException
+     * @param compressionFile The entity that represents the cloud drive been passed through the chain
+     * @throws CloudClientUploadException Wrap IOException
      */
     @Override
     public void uploadFile(CompressionFile compressionFile) throws CloudClientUploadException {
         try {
-            LOGGER.info("Uploading file: " + compressionFile.compressedFile().getName() + "; size: "
-                    + FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(compressionFile.compressedFile())));
+            LOGGER.info("Uploading file: {}; size: {}", compressionFile.compressedFile().getName(), FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(compressionFile.compressedFile())));
             var googleFile = new com.google.api.services.drive.model.File();
             googleFile.setName(compressionFile.name());
             var mediaContent = new FileContent(compressionFile.mimeType(), compressionFile.compressedFile());

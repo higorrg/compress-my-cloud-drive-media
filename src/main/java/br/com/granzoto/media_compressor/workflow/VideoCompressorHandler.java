@@ -6,11 +6,12 @@ import br.com.granzoto.media_compressor.model.CompressionFile;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VideoCompressorHandler extends AbstractCloudClientHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(VideoCompressorHandler.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(VideoCompressorHandler.class.getName());
     public static final String VIDEO_MIME_TYPE = "video";
 
     @Override
@@ -47,14 +48,14 @@ public class VideoCompressorHandler extends AbstractCloudClientHandler {
             System.out.println();
 
             if (exitCode == 0) {
-                LOGGER.info("Video compression successfully finished " + outputFile.getName());
+                LOGGER.info("Video compression successfully finished {}", outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("Video compression failed: Exit code " + exitCode+". File: "+inputFile.getAbsolutePath());
+                LOGGER.warn("Video compression failed: Exit code {}. File: {}", exitCode, inputFile.getAbsolutePath());
                 return false;
             }
         } catch (Exception e) {
-            LOGGER.severe("Video compression failed: " + e.getMessage()+". File: "+inputFile.getAbsolutePath());
+            LOGGER.error("Video compression failed: {}. File: {}", e.getMessage(), inputFile.getAbsolutePath());
             return false;
         }
     }

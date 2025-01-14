@@ -3,13 +3,13 @@ package br.com.granzoto.media_compressor.workflow;
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientDownloadException;
 import br.com.granzoto.media_compressor.model.CompressionFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.logging.Logger;
-
 public class DownloadHandler extends AbstractCloudClientHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(DownloadHandler.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadHandler.class);
 
     @Override
     public void handleStart(CloudClient cloudClient) {
@@ -23,11 +23,11 @@ public class DownloadHandler extends AbstractCloudClientHandler {
             if (!compressionFile.originalFile().exists()) {
                 this.cloudClient.downloadFile(compressionFile);
             } else {
-                LOGGER.info("File already exists. Skipping download. "+compressionFile.originalFile().getAbsolutePath());
+                LOGGER.info("File already exists. Skipping download. {}", compressionFile.originalFile().getAbsolutePath());
             }
             this.nextItemHandler(compressionFile);
         } catch (CloudClientDownloadException e) {
-            LOGGER.warning("Download from Cloud Drive failed");
+            LOGGER.warn("Download from Cloud Drive failed");
         }
     }
 

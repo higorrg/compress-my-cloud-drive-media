@@ -6,11 +6,12 @@ import org.apache.commons.io.FileUtils;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileListToLogHandler extends AbstractCloudClientHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(FileListToLogHandler.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileListToLogHandler.class.getName());
 
     @Override
     public void handleStart(CloudClient cloudClient) {
@@ -33,8 +34,8 @@ public class FileListToLogHandler extends AbstractCloudClientHandler {
                 .map(CompressionFile::size)
                 .reduce(BigInteger.ZERO, BigInteger::add);
         LOGGER.info("");
-        LOGGER.info("Total size: " + FileUtils.byteCountToDisplaySize(totalSize));
-        LOGGER.info("Total items: " + files.size());
+        LOGGER.info("Total size: {}", FileUtils.byteCountToDisplaySize(totalSize));
+        LOGGER.info("Total items: {}", files.size());
         LOGGER.info("");
         this.nextEndHandler(files);
     }

@@ -4,10 +4,11 @@ import br.com.granzoto.media_compressor.model.CompressionFile;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PdfCompressorHandler extends AbstractCloudClientHandler {
-    private static final Logger LOGGER = Logger.getLogger(PdfCompressorHandler.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(PdfCompressorHandler.class.getName());
     public static final String PDF_MIME_TYPE = "application/pdf";
 
     @Override
@@ -38,14 +39,14 @@ public class PdfCompressorHandler extends AbstractCloudClientHandler {
             var exitCode = process.waitFor();
 
             if (exitCode == 0) {
-                LOGGER.info("PDF compression successfully finished " + outputFile.getName());
+                LOGGER.info("PDF compression successfully finished {}", outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("PDF compression failed: Exit code " + exitCode+". File: "+inputFile.getAbsolutePath());
+                LOGGER.warn("PDF compression failed: Exit code {}. File: {}", exitCode, inputFile.getAbsolutePath());
                 return false;
             }
         } catch (Exception e) {
-            LOGGER.severe("PDF compression failed: " + e.getMessage()+". File: "+inputFile.getAbsolutePath());
+            LOGGER.error("PDF compression failed: {}. File: {}", e.getMessage(), inputFile.getAbsolutePath());
             return false;
         }
     }

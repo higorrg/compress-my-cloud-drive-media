@@ -3,17 +3,13 @@ br/com/granzoto/media_compressor/cloud_client_for_google/GoogleDriveClient.class
 br/com/granzoto/media_compressor/workflow/VideoCompressorHandler.class
 br/com/granzoto/media_compressor/workflow/AbstractCloudClientHandler.class
 br/com/granzoto/media_compressor/cloud_client/CloudClientDownloadException.class
-br/com/granzoto/media_compressor/compressor_with_ffmpeg/FFmpegCompressorWithJava.class
-br/com/granzoto/media_compressor/compressor_strategy/CompressorStrategy.class
 br/com/granzoto/media_compressor/cloud_client/CloudClient.class
-br/com/granzoto/media_compressor/compressor_with_ffmpeg/FFmpegVideoCompressorWithHost.class
 br/com/granzoto/media_compressor/model/FolderInfo.class
 br/com/granzoto/media_compressor/workflow/HandlerFactory.class
 br/com/granzoto/media_compressor/workflow/ImageCompressorHandler.class
 br/com/granzoto/media_compressor/workflow/FileListToLogHandler.class
 br/com/granzoto/media_compressor/model/CompressionFile.class
 br/com/granzoto/media_compressor/workflow/FileListToCsvHandler.class
-br/com/granzoto/media_compressor/compressor_with_ffmpeg/FFmpegImageCompressorWithHost.class
 br/com/granzoto/media_compressor/cloud_client/CloudClientHandler.class
 br/com/granzoto/media_compressor/workflow/UploadHandler.class
 br/com/granzoto/media_compressor/model/CompressionFileFactory.class

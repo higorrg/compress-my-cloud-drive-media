@@ -6,11 +6,12 @@ import br.com.granzoto.media_compressor.model.CompressionFile;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImageCompressorHandler extends AbstractCloudClientHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(ImageCompressorHandler.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCompressorHandler.class.getName());
     public static final String IMAGE_MIME_TYPE = "image";
 
     @Override
@@ -45,14 +46,14 @@ public class ImageCompressorHandler extends AbstractCloudClientHandler {
             var exitCode = process.waitFor();
 
             if (exitCode == 0) {
-                LOGGER.info("Image compression successfully finished " + outputFile.getName());
+                LOGGER.info("Image compression successfully finished {}", outputFile.getName());
                 return true;
             } else {
-                LOGGER.warning("Image compression failed: Exit code " + exitCode+". File: "+inputFile.getAbsolutePath());
+                LOGGER.warn("Image compression failed: Exit code {}. File: {}", exitCode, inputFile.getAbsolutePath());
                 return false;
             }
         } catch (Exception e) {
-            LOGGER.severe("Image compression failed: " + e.getMessage()+". File: "+inputFile.getAbsolutePath());
+            LOGGER.error("Image compression failed: {}. File: {}", e.getMessage(), inputFile.getAbsolutePath());
             return false;
         }
     }
