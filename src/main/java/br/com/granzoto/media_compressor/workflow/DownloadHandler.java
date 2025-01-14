@@ -21,13 +21,13 @@ public class DownloadHandler extends AbstractCloudClientHandler {
     public void handleItem(CompressionFile compressionFile) {
         try {
             if (!compressionFile.originalFile().exists()) {
-                cloudClient.downloadFile(compressionFile);
+                this.cloudClient.downloadFile(compressionFile);
             } else {
                 LOGGER.info("File already exists. Skipping download. "+compressionFile.originalFile().getAbsolutePath());
             }
             this.nextItemHandler(compressionFile);
         } catch (CloudClientDownloadException e) {
-            LOGGER.warning("Download from Google Drive failed");
+            LOGGER.warning("Download from Cloud Drive failed");
         }
     }
 
