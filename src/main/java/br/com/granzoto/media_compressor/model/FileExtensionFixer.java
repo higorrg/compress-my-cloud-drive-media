@@ -1,6 +1,5 @@
 package br.com.granzoto.media_compressor.model;
 
-import com.google.api.services.drive.model.File;
 import com.google.common.base.Strings;
 import org.apache.commons.io.FilenameUtils;
 
@@ -17,11 +16,14 @@ public class FileExtensionFixer {
     /**
      * {@code googleFile.getFileExtension()} is not reliable because it
      * didn't work with pdf files.
-     * **/
-    static void fixFileExtensionIfNull(File googleFile) {
-        if (Strings.isNullOrEmpty(FilenameUtils.getExtension(googleFile.getName()))){
-            googleFile.setName(googleFile.getName()+"."+ extractFileExtensionFromMimeType(googleFile.getMimeType()));
+     *
+     * @return The filename with extension
+     **/
+    static String fixFileExtensionIfNull(String currentFileName, String mimeType) {
+        if (Strings.isNullOrEmpty(FilenameUtils.getExtension(currentFileName))){
+            return currentFileName+"."+ extractFileExtensionFromMimeType(mimeType);
         }
+        return currentFileName;
     }
 
     static String extractFileExtensionFromMimeType(String mimeType){

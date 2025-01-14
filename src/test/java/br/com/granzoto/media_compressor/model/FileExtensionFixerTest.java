@@ -1,6 +1,5 @@
 package br.com.granzoto.media_compressor.model;
 
-import com.google.api.services.drive.model.File;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,45 +7,42 @@ import static org.junit.jupiter.api.Assertions.*;
 class FileExtensionFixerTest {
 
     @Test
-    void testFixFileExtentionIfNull_AddsExtensionWhenMp4IsMissing() {
+    void testFixFileExtensionIfNull_AddsExtensionWhenMp4IsMissing() {
         // Arrange
-        File googleFile = new File();
-        googleFile.setName("example");
-        googleFile.setMimeType("video/mp4");
+        var currentFileName ="example";
+        var mimeType = "video/mp4";
 
         // Act
-        FileExtensionFixer.fixFileExtensionIfNull(googleFile);
+        var fixedFileName = FileExtensionFixer.fixFileExtensionIfNull(currentFileName, mimeType);
 
         // Assert
-        assertEquals("example.mp4", googleFile.getName(), "The file extension should be added to the file name.");
+        assertEquals("example.mp4", fixedFileName, "The file extension should be added to the file name.");
     }
 
     @Test
     void testFixFileExtensionIfNull_LeavesNameUnchangedWhenMp4ExtensionExists() {
         // Arrange
-        File googleFile = new File();
-        googleFile.setName("example.mp4");
-        googleFile.setMimeType("video/mp4");
+        var currentFileName ="example.mp4";
+        var mimeType = "video/mp4";
 
         // Act
-        FileExtensionFixer.fixFileExtensionIfNull(googleFile);
+        var fixedFileName = FileExtensionFixer.fixFileExtensionIfNull(currentFileName, mimeType);
 
         // Assert
-        assertEquals("example.mp4", googleFile.getName(), "The file name should remain unchanged.");
+        assertEquals("example.mp4", fixedFileName, "The file name should remain unchanged.");
     }
 
     @Test
     void testFixFileExtensionIfNull_LeavesNameUnchangedWhenPdfExtensionExists() {
         // Arrange
-        File googleFile = new File();
-        googleFile.setName("example.pdf");
-        googleFile.setMimeType("application/pdf");
+        var currentFileName ="example.pdf";
+        var mimeType = "application/pdf";
 
         // Act
-        FileExtensionFixer.fixFileExtensionIfNull(googleFile);
+        var fixedFileName = FileExtensionFixer.fixFileExtensionIfNull(currentFileName, mimeType);
 
         // Assert
-        assertEquals("example.pdf", googleFile.getName(), "The file name should remain unchanged.");
+        assertEquals("example.pdf", fixedFileName, "The file name should remain unchanged.");
     }
 
     @Test
