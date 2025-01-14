@@ -4,14 +4,12 @@ import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientListFilesException;
 import br.com.granzoto.media_compressor.workflow.CloudClientFactory;
 import br.com.granzoto.media_compressor.workflow.HandlerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.logging.LogManager;
 
 @Command(name = "MediaCompressor", mixinStandardHelpOptions = true, version = "1.0",
         description = "Compresses media files from Cloud Drives.")
@@ -42,14 +40,8 @@ public class Main implements Callable<Integer> {
     String driveInstance;
 
     public static void main(String... args) {
-        setupLog();
         int exitCode = new CommandLine(new Main()).execute(args);
         System.exit(exitCode);
-    }
-
-    private static void setupLog() {
-        LogManager.getLogManager().reset();
-        SLF4JBridgeHandler.install();
     }
 
     @Override
