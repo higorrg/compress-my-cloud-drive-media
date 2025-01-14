@@ -1,7 +1,9 @@
 package br.com.granzoto.media_compressor.cloud_client_for_google;
 
-import br.com.granzoto.media_compressor.cloud_client.*;
-import br.com.granzoto.media_compressor.workflow.FirstCloudClientHandler;
+import br.com.granzoto.media_compressor.cloud_client.AbstractCloudClient;
+import br.com.granzoto.media_compressor.cloud_client.CloudClientDownloadException;
+import br.com.granzoto.media_compressor.cloud_client.CloudClientListFilesException;
+import br.com.granzoto.media_compressor.cloud_client.CloudClientUploadException;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import br.com.granzoto.media_compressor.model.FolderInfo;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -12,29 +14,27 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
-import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-public class GoogleDriveClient implements CloudClient {
+public class GoogleDriveClient extends AbstractCloudClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleDriveClient.class.getName());
-
     private static final String APPLICATION_NAME = "Compress My Google Drive Media";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final int PAGE_SIZE = 50;
-    public static final String APPLICATION_VND_GOOGLE_APPS_FOLDER = "application/vnd.google-apps.folder";
-
+    private static final String APPLICATION_VND_GOOGLE_APPS_FOLDER = "application/vnd.google-apps.folder";
     private static GoogleDriveClient instance;
 
     private final Drive drive;
-
-    private final CloudClientHandler firstHandler = new FirstCloudClientHandler();
 
     public static synchronized GoogleDriveClient getInstance() {
         if (instance == null) {
@@ -48,35 +48,14 @@ public class GoogleDriveClient implements CloudClient {
     }
 
     private GoogleDriveClient() throws GeneralSecurityException, IOException {
-        this.drive = initializeDrive();
-    }
-
-    private Drive initializeDrive() throws GeneralSecurityException, IOException {
         NetHttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-        return new Drive.Builder(transport, JSON_FACTORY,
+        this.drive = new Drive.Builder(transport, JSON_FACTORY,
                 GoogleDriveAuth.getCredentials(transport, JSON_FACTORY))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
 
-    @Override
-    public void addHandler(CloudClientHandler handler) {
-        if (Objects.isNull(handler)){
-            throw new IllegalArgumentException("Cloud client handler can't be null");
-        }
-        this.firstHandler.link(handler);
-    }
-
-    @Override
-    public void runFiles() throws CloudClientListFilesException {
-        this.firstHandler.handleStart(this);
-        Map<String, FolderInfo> folderPaths = new HashMap<>();
-        List<CompressionFile> files = new ArrayList<>();
-        this.listFilesByPage(null, folderPaths, files);
-        this.firstHandler.handleEnd(files);
-    }
-
-    private void listFilesByPage(String page, Map<String, FolderInfo> folderPaths, List<CompressionFile> files)
+    protected void listFilesByPage(String page, Map<String, FolderInfo> folderPaths, List<CompressionFile> files)
             throws CloudClientListFilesException {
         try {
             FileList googleDriveFiles = getFileList(page);
@@ -88,7 +67,7 @@ public class GoogleDriveClient implements CloudClient {
                 } else {
                     CompressionFile compressionFile = CompressionFileFromGoogleFileFactory.createCompressionFile(googleFile, folderPaths);
                     files.add(compressionFile);
-                    this.firstHandler.handleItem(compressionFile);
+                    this.handleNextItem(compressionFile);
                 }
             }
 
@@ -134,11 +113,12 @@ public class GoogleDriveClient implements CloudClient {
 
     /**
      * It's important to note that set the name is not mandatory on upload,
-     * but it's done to assure what @{@link br.com.granzoto.media_compressor.model.FileExtensionFixer}
+     * but it's done here to assure what {@link br.com.granzoto.media_compressor.model.FileExtensionFixer}
      * meant to fix.
-     * @see br.com.granzoto.media_compressor.model.FileExtensionFixer
+     *
      * @param compressionFile The entity that represents the cloud drive been passed through the chain
      * @throws CloudClientUploadException Wrap IOException
+     * @see br.com.granzoto.media_compressor.model.FileExtensionFixer
      */
     @Override
     public void uploadFile(CompressionFile compressionFile) throws CloudClientUploadException {
