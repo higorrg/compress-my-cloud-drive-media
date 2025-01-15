@@ -5,10 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
-import static br.com.granzoto.media_compressor.model.FileFactory.DOWNLOAD_PATH;
-import static br.com.granzoto.media_compressor.model.FileFactory.UPLOAD_PATH;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileFactoryTest {

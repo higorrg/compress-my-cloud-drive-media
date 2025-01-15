@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class FileFactory {
-    static final Path DOWNLOAD_PATH = Path.of(FileUtils.getUserDirectoryPath(), "Downloads",
-            "Original_Files");
-    static final Path UPLOAD_PATH = Path.of(FileUtils.getUserDirectoryPath(), "Downloads",
-            "Compressed_Files");
+
+    private static final String ORIGINAL_PATH = "Original_Files";
+    private static final String COMPRESSED_PATH = "Compressed_Files";
 
     public static File createInputFile(com.google.api.services.drive.model.File googleFile, String folderPath) throws IOException {
-        var inputFile = Path.of(DOWNLOAD_PATH.toString(),
+        var inputFile = Path.of(UserOptions.getInstance().getDownloadPath(),
+                        ORIGINAL_PATH,
                         folderPath,
                         googleFile.getName())
                 .toFile();
@@ -22,7 +22,8 @@ public class FileFactory {
     }
 
     public static File createOutputFile(com.google.api.services.drive.model.File googleFile, String folderPath) throws IOException {
-        java.io.File outputFile = Path.of(UPLOAD_PATH.toString(),
+        java.io.File outputFile = Path.of(UserOptions.getInstance().getDownloadPath(),
+                        COMPRESSED_PATH,
                         folderPath,
                         googleFile.getName())
                 .toFile();

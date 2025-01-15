@@ -2,60 +2,40 @@ package br.com.granzoto.media_compressor.main;
 
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientListFilesException;
+import br.com.granzoto.media_compressor.model.UserOptions;
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
 import java.util.Map;
-import java.util.concurrent.Callable;
 
-@Command(name = "MediaCompressor", mixinStandardHelpOptions = true, version = "1.0",
-        description = "Compresses media files from Cloud Drives.")
-public class Main implements Callable<Integer> {
+import static java.lang.System.out;
 
-    @Option(names = "--list", description = "Display files on console.")
-    boolean listHandler;
+public class Main {
 
-    @Option(names = "--csv", description = "Create CSV file with file data.")
-    boolean csvHandler;
-
-    @Option(names = "--video", description = "Compress videos.")
-    boolean videoCompressorHandler;
-
-    @Option(names = "--image", description = "Compress images.")
-    boolean imageCompressorHandler;
-
-    @Option(names = "--pdf", description = "Compress PDF.")
-    boolean pdfCompressorHandler;
-
-    @Option(names = "--download", description = "Enable the DownloadHandler.")
-    boolean downloadHandler;
-
-    @Option(names = "--upload", description = "Enable the UploadHandler.")
-    boolean uploadHandler;
-
-    @Option(names = "--cloud-drive", description = "Connect to cloud drive. Options are: 'Google'", required = true)
-    String cloudDriveName;
-
-    public static void main(String... args) {
-        int exitCode = new CommandLine(new Main()).execute(args);
-        System.exit(exitCode);
+    public static void main(String... args) throws CloudClientListFilesException {
+        try {
+            new CommandLine(UserOptions.getInstance()).parseArgs(args);
+            int exitCode = new Main().run();
+            System.exit(exitCode);
+        } catch (CommandLine.ParameterException e) {
+            System.err.println(e.getMessage());
+            e.getCommandLine().usage(out, CommandLine.Help.Ansi.ON);
+            System.exit(2);
+        }
     }
 
-    @Override
-    public Integer call() throws CloudClientListFilesException {
+    public Integer run() throws CloudClientListFilesException {
         var cloudClientFactory = new CloudClientFactory();
-        CloudClient cloudClient = cloudClientFactory.getCloudClient(cloudDriveName);
+        CloudClient cloudClient = cloudClientFactory.getCloudClient(UserOptions.getInstance().getCloudDriveName());
 
         var handlerFactory = new HandlerFactory();
         handlerFactory.createCloudClientHandlers(cloudClient, Map.of(
-                "listHandler", listHandler,
-                "csvHandler", csvHandler,
-                "downloadHandler", downloadHandler,
-                "videoCompressorHandler", videoCompressorHandler,
-                "imageCompressorHandler", imageCompressorHandler,
-                "pdfCompressorHandler", pdfCompressorHandler,
-                "uploadHandler", uploadHandler
+                "listHandler", UserOptions.getInstance().isListHandler(),
+                "csvHandler", UserOptions.getInstance().isCsvHandler(),
+                "downloadHandler", UserOptions.getInstance().isDownloadHandler(),
+                "videoCompressorHandler", UserOptions.getInstance().isVideoCompressorHandler(),
+                "imageCompressorHandler", UserOptions.getInstance().isImageCompressorHandler(),
+                "pdfCompressorHandler", UserOptions.getInstance().isPdfCompressorHandler(),
+                "uploadHandler", UserOptions.getInstance().isUploadHandler()
         ));
 
         cloudClient.runFiles();
