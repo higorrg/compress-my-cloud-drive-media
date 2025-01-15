@@ -5,6 +5,9 @@ import br.com.granzoto.media_compressor.model.CompressionFile;
 public interface CloudClient {
 
     void addHandler(CloudClientHandler handler);
+    void addStartObserver(CloudClientStartObserver observer);
+    void addItemObserver(CloudClientItemObserver observer);
+    void addEndObserver(CloudClientEndObserver observer);
     void runFiles() throws CloudClientListFilesException;
     void downloadFile(CompressionFile compressionFile) throws CloudClientDownloadException;
     void uploadFile(CompressionFile compressionFile) throws CloudClientUploadException;

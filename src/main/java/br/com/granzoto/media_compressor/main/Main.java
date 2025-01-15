@@ -1,9 +1,7 @@
-package br.com.granzoto.media_compressor;
+package br.com.granzoto.media_compressor.main;
 
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientListFilesException;
-import br.com.granzoto.media_compressor.workflow.CloudClientFactory;
-import br.com.granzoto.media_compressor.workflow.HandlerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -15,8 +13,8 @@ import java.util.concurrent.Callable;
         description = "Compresses media files from Cloud Drives.")
 public class Main implements Callable<Integer> {
 
-    @Option(names = "--log", description = "Display log on console.")
-    boolean logHandler;
+    @Option(names = "--list", description = "Display files on console.")
+    boolean listHandler;
 
     @Option(names = "--csv", description = "Create CSV file with file data.")
     boolean csvHandler;
@@ -51,7 +49,7 @@ public class Main implements Callable<Integer> {
 
         var handlerFactory = new HandlerFactory();
         handlerFactory.createCloudClientHandlers(cloudClient, Map.of(
-                "logHandler", logHandler,
+                "listHandler", listHandler,
                 "csvHandler", csvHandler,
                 "downloadHandler", downloadHandler,
                 "videoCompressorHandler", videoCompressorHandler,

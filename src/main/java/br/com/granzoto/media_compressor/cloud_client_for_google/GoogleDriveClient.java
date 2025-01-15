@@ -66,8 +66,7 @@ public class GoogleDriveClient extends AbstractCloudClient {
                     folderPaths.put(googleFile.getId(), new FolderInfo(googleFile.getName(), parentId));
                 } else {
                     CompressionFile compressionFile = CompressionFileFromGoogleFileFactory.createCompressionFile(googleFile, folderPaths);
-                    files.add(compressionFile);
-                    this.handleNextItem(compressionFile);
+                    this.notifyItem(compressionFile);
                 }
             }
 
@@ -82,15 +81,7 @@ public class GoogleDriveClient extends AbstractCloudClient {
 
     private FileList getFileList(String page) throws IOException {
         return this.drive.files().list()
-                .setQ("""
-                        'me' in owners and
-                        trashed = false and
-                        (mimeType='application/vnd.google-apps.folder' or
-                        mimeType contains 'video/' or
-                        mimeType contains 'image/'or
-                        mimeType = 'application/pdf') and
-                        modifiedTime < '2024-01-04T00:00:00'
-                        """)
+                .setQ("trashed = false")
                 .setSpaces("drive")
                 .setPageSize(PAGE_SIZE)
                 .setFields("nextPageToken, files(id, name, parents, size, mimeType)")

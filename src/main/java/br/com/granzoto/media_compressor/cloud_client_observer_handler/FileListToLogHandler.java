@@ -1,35 +1,31 @@
-package br.com.granzoto.media_compressor.workflow;
+package br.com.granzoto.media_compressor.cloud_client_observer_handler;
 
-import br.com.granzoto.media_compressor.cloud_client.CloudClient;
+import br.com.granzoto.media_compressor.cloud_client.*;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import org.apache.commons.io.FileUtils;
-
-import java.math.BigInteger;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileListToLogHandler extends AbstractCloudClientHandler {
+import java.math.BigInteger;
+import java.util.List;
+
+public class FileListToLogHandler implements CloudClientHandler, CloudClientStartObserver, CloudClientItemObserver, CloudClientEndObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileListToLogHandler.class.getName());
 
     @Override
     public void handleStart(CloudClient cloudClient) {
-        super.handleStart(cloudClient);
         LOGGER.info("Listing media files from your Google Drive");
-        this.nextStartHandler(cloudClient);
     }
 
     @Override
     public void handleItem(CompressionFile compressionFile) {
         LOGGER.info("");
         LOGGER.info(compressionFile.toString());
-        this.nextItemHandler(compressionFile);
     }
 
     @Override
     public void handleEnd(List<CompressionFile> files) {
-        super.handleEnd(files);
         BigInteger totalSize = files.stream()
                 .map(CompressionFile::size)
                 .reduce(BigInteger.ZERO, BigInteger::add);
@@ -37,6 +33,12 @@ public class FileListToLogHandler extends AbstractCloudClientHandler {
         LOGGER.info("Total size: {}", FileUtils.byteCountToDisplaySize(totalSize));
         LOGGER.info("Total items: {}", files.size());
         LOGGER.info("");
-        this.nextEndHandler(files);
+    }
+
+    @Override
+    public void registerObserver(CloudClient cloudClient) {
+        cloudClient.addStartObserver(this);
+        cloudClient.addItemObserver(this);
+        cloudClient.addEndObserver(this);
     }
 }

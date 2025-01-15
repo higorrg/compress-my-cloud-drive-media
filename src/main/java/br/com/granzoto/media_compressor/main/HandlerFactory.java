@@ -1,6 +1,7 @@
-package br.com.granzoto.media_compressor.workflow;
+package br.com.granzoto.media_compressor.main;
 
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
+import br.com.granzoto.media_compressor.cloud_client_observer_handler.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class HandlerFactory {
     private final Map<String, Consumer<CloudClient>> handlerCreators = new HashMap<>();
 
     public HandlerFactory() {
-        handlerCreators.put("logHandler", client -> client.addHandler(new FileListToLogHandler()));
+        handlerCreators.put("listHandler", client -> client.addHandler(new FileListToLogHandler()));
         handlerCreators.put("csvHandler", client -> client.addHandler(new FileListToCsvHandler()));
         handlerCreators.put("downloadHandler", client -> client.addHandler(new DownloadHandler()));
         handlerCreators.put("videoCompressorHandler", client -> client.addHandler(new VideoCompressorHandler()));
