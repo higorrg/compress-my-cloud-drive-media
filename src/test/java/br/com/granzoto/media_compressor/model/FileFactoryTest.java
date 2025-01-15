@@ -1,9 +1,11 @@
 package br.com.granzoto.media_compressor.model;
 
 import com.google.api.services.drive.model.File;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static br.com.granzoto.media_compressor.model.FileFactory.DOWNLOAD_PATH;
 import static br.com.granzoto.media_compressor.model.FileFactory.UPLOAD_PATH;
@@ -58,6 +60,7 @@ class FileFactoryTest {
         assertTrue(inputFile.getParentFile().exists(), "Parent directories should exist.");
         assertEquals(DOWNLOAD_PATH.resolve("videos/nested/folder/example.mp4").toString(), inputFile.getPath(),
                 "The input file path should match the expected nested path.");
+        FileUtils.deleteDirectory(DOWNLOAD_PATH.resolve("videos/nested").toFile());
     }
 
     @Test
@@ -75,5 +78,6 @@ class FileFactoryTest {
         assertTrue(outputFile.getParentFile().exists(), "Parent directories should exist.");
         assertEquals(UPLOAD_PATH.resolve("videos/nested/folder/example.mp4").toString(), outputFile.getPath(),
                 "The output file path should match the expected nested path.");
+        FileUtils.deleteDirectory(UPLOAD_PATH.resolve("videos/nested").toFile());
     }
 }
