@@ -2,6 +2,9 @@ package br.com.granzoto.media_compressor.cloud_client;
 
 import br.com.granzoto.media_compressor.model.CompressionFile;
 
+/**
+ * Represents the cloud drive that the user wants to compress his media files.
+ */
 public interface CloudClient {
 
     void addHandler(CloudClientHandler handler);
