@@ -27,14 +27,14 @@ public class UserOptions {
     @CommandLine.Option(names = "--download", description = "Enable the DownloadHandler.")
     private boolean downloadHandler;
 
+    @CommandLine.Option(names = "--download-folder", description = "Folder to download files, like ~/Downloads for example.")
+    private String downloadPath;
+
     @CommandLine.Option(names = "--upload", description = "Enable the UploadHandler.")
     private boolean uploadHandler;
 
     @CommandLine.Option(names = "--cloud-drive", description = "Connect to cloud drive. Options are: 'Google'", required = true)
     private String cloudDriveName;
-
-    @CommandLine.Option(names = "--download-folder", description = "Folder to download files, like ~/Downloads for example.", required = true)
-    private String downloadPath;
 
     private UserOptions() {
         super();

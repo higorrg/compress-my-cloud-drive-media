@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +23,7 @@ class FileFactoryTest {
 
         // Assert
         assertNotNull(inputFile, "Input file should not be null.");
-        assertEquals(DOWNLOAD_PATH.resolve("videos/example.mp4").toString(), inputFile.getPath(),
+        assertEquals(Path.of(UserOptions.getInstance().getDownloadPath(), FileFactory.ORIGINAL_PATH).resolve("videos/example.mp4").toString(), inputFile.getPath(),
                 "The input file path should match the expected path.");
     }
 
@@ -38,7 +39,8 @@ class FileFactoryTest {
 
         // Assert
         assertNotNull(outputFile, "Output file should not be null.");
-        assertEquals(UPLOAD_PATH.resolve("videos/example.mp4").toString(), outputFile.getPath(),
+        String outputFilePath = Path.of(UserOptions.getInstance().getDownloadPath(), FileFactory.COMPRESSED_PATH).resolve("videos/example.mp4").toString();
+        assertEquals(outputFilePath, outputFile.getPath(),
                 "The output file path should match the expected path.");
     }
 
@@ -55,9 +57,9 @@ class FileFactoryTest {
         // Assert
         assertNotNull(inputFile, "Input file should not be null.");
         assertTrue(inputFile.getParentFile().exists(), "Parent directories should exist.");
-        assertEquals(DOWNLOAD_PATH.resolve("videos/nested/folder/example.mp4").toString(), inputFile.getPath(),
+        String inputFilePath = Path.of(UserOptions.getInstance().getDownloadPath(), FileFactory.ORIGINAL_PATH).resolve("videos/nested/folder/example.mp4").toString();
+        assertEquals(inputFilePath, inputFile.getPath(),
                 "The input file path should match the expected nested path.");
-        FileUtils.deleteDirectory(DOWNLOAD_PATH.resolve("videos/nested").toFile());
     }
 
     @Test
@@ -73,8 +75,8 @@ class FileFactoryTest {
         // Assert
         assertNotNull(outputFile, "Output file should not be null.");
         assertTrue(outputFile.getParentFile().exists(), "Parent directories should exist.");
-        assertEquals(UPLOAD_PATH.resolve("videos/nested/folder/example.mp4").toString(), outputFile.getPath(),
+        String outputFilePath = Path.of(UserOptions.getInstance().getDownloadPath(), FileFactory.COMPRESSED_PATH).resolve("videos/nested/folder/example.mp4").toString();
+        assertEquals(outputFilePath, outputFile.getPath(),
                 "The output file path should match the expected nested path.");
-        FileUtils.deleteDirectory(UPLOAD_PATH.resolve("videos/nested").toFile());
     }
 }

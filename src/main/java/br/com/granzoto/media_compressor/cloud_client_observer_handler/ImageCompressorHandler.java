@@ -4,10 +4,12 @@ import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientHandler;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientItemObserver;
 import br.com.granzoto.media_compressor.model.CompressionFile;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class ImageCompressorHandler implements CloudClientHandler, CloudClientItemObserver {
@@ -32,6 +34,7 @@ public class ImageCompressorHandler implements CloudClientHandler, CloudClientIt
 
     private boolean executeCompression(File inputFile, File outputFile) {
         try {
+            FileUtils.createParentDirectories(outputFile);
             String[] cmd = {"ffmpeg",
                     "-y",
                     "-loglevel", "quiet",
