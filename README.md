@@ -26,6 +26,35 @@ the application.
 
 ![compress-my-cloud-drive-media-Component.drawio.png](diagram/compress-my-cloud-drive-media-Component.drawio.png)
 
+## Google Drive Setup
+
+Before running the application with `--cloud-drive=google`, you need to create your own OAuth
+client credentials in Google Cloud and make them available to the application. If this step is
+skipped or misconfigured, the application fails at startup with `Fail to initialize Google Drive
+Client`.
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project
+   (or select an existing one).
+2. Enable the **Google Drive API** for that project (APIs & Services > Library > Google Drive API
+   > Enable).
+3. Configure the **OAuth consent screen** (APIs & Services > OAuth consent screen). For personal
+   use, "External" with your own Google account added as a test user is enough.
+4. Create an **OAuth client ID** (APIs & Services > Credentials > Create Credentials > OAuth
+   client ID), choosing **Desktop app** as the application type.
+5. Download the generated JSON file and save it as `client_secret.json` in the following path:
+
+   ```text
+   ~/credentials/client_secret.json
+   ```
+
+   This path is fixed and not currently configurable.
+6. Run any command with `--cloud-drive=google`. The application will open a browser window (it
+   starts a local server on port `8888` for the OAuth redirect) so you can sign in and grant
+   access. After you approve it, the resulting token is cached under a `tokens/` folder created
+   next to where you run the jar, so future executions won't ask you to sign in again.
+   * If you ever change the requested permissions/scopes, delete the `tokens/` folder to force a
+     new authorization flow.
+
 ## How to Use
 
 ### List Files
