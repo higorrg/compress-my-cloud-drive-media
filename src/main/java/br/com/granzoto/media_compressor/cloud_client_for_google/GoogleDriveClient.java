@@ -117,6 +117,7 @@ public class GoogleDriveClient extends AbstractCloudClient {
             LOGGER.info("Uploading file: {}; size: {}", compressionFile.compressedFile().getName(), FileUtils.byteCountToDisplaySize(FileUtils.sizeOfAsBigInteger(compressionFile.compressedFile())));
             var googleFile = new com.google.api.services.drive.model.File();
             googleFile.setName(compressionFile.name());
+            googleFile.setMimeType(compressionFile.mimeType());
             var mediaContent = new FileContent(compressionFile.mimeType(), compressionFile.compressedFile());
             this.drive.files().update(compressionFile.id(), googleFile, mediaContent)
                     .setFields("id, name, mimeType")
