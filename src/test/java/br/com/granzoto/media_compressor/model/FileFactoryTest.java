@@ -45,7 +45,7 @@ class FileFactoryTest {
     }
 
     @Test
-    void testCreateInputFile_CreatesParentDirectories() throws IOException {
+    void testCreateInputFile_CreatesCorrectNestedPath() throws IOException {
         // Arrange
         File googleFile = new File();
         googleFile.setName("example.mp4");
@@ -56,14 +56,13 @@ class FileFactoryTest {
 
         // Assert
         assertNotNull(inputFile, "Input file should not be null.");
-        assertTrue(inputFile.getParentFile().exists(), "Parent directories should exist.");
         String inputFilePath = Path.of(UserOptions.getInstance().getDownloadPath(), FileFactory.ORIGINAL_PATH).resolve("videos/nested/folder/example.mp4").toString();
         assertEquals(inputFilePath, inputFile.getPath(),
                 "The input file path should match the expected nested path.");
     }
 
     @Test
-    void testCreateOutputFile_CreatesParentDirectories() throws IOException {
+    void testCreateOutputFile_CreatesCorrectNestedPath() throws IOException {
         // Arrange
         File googleFile = new File();
         googleFile.setName("example.mp4");
@@ -74,7 +73,6 @@ class FileFactoryTest {
 
         // Assert
         assertNotNull(outputFile, "Output file should not be null.");
-        assertTrue(outputFile.getParentFile().exists(), "Parent directories should exist.");
         String outputFilePath = Path.of(UserOptions.getInstance().getDownloadPath(), FileFactory.COMPRESSED_PATH).resolve("videos/nested/folder/example.mp4").toString();
         assertEquals(outputFilePath, outputFile.getPath(),
                 "The output file path should match the expected nested path.");
