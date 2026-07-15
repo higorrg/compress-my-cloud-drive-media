@@ -4,6 +4,7 @@ import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client_observer_handler.*;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -36,7 +37,17 @@ public class HandlerFactory {
         handlerCreators.put("uploadHandler", client -> client.addHandler(new UploadHandler()));
     }
 
-    public void createCloudClientHandlers(CloudClient client, Map<String, Boolean> options) {
+    /**
+     * <p>
+     * {@code options} must be a {@link LinkedHashMap} (not just any {@link Map}) because
+     * handler registration order determines observer notification order: handlers are
+     * notified per file in the exact order they're registered here, so e.g. downloading
+     * must be registered before compressing, which must be registered before uploading.
+     * An unordered map (like {@code Map.of(...)}, whose iteration order is unspecified
+     * and randomized per JVM run) would make that order non-deterministic.
+     * </p>
+     */
+    public void createCloudClientHandlers(CloudClient client, LinkedHashMap<String, Boolean> options) {
         options.forEach((option, enabled) -> {
             if (enabled && handlerCreators.containsKey(option)) {
                 handlerCreators.get(option).accept(client);

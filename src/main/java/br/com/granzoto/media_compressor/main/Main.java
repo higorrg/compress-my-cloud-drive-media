@@ -5,7 +5,7 @@ import br.com.granzoto.media_compressor.cloud_client.CloudClientListFilesExcepti
 import br.com.granzoto.media_compressor.model.UserOptions;
 import picocli.CommandLine;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import static java.lang.System.out;
 
@@ -28,15 +28,18 @@ public class Main {
         CloudClient cloudClient = cloudClientFactory.getCloudClient(UserOptions.getInstance().getCloudDriveName());
 
         var handlerFactory = new HandlerFactory();
-        handlerFactory.createCloudClientHandlers(cloudClient, Map.of(
-                "listHandler", UserOptions.getInstance().isListHandler(),
-                "csvHandler", UserOptions.getInstance().isCsvHandler(),
-                "downloadHandler", UserOptions.getInstance().isDownloadHandler(),
-                "videoCompressorHandler", UserOptions.getInstance().isVideoCompressorHandler(),
-                "imageCompressorHandler", UserOptions.getInstance().isImageCompressorHandler(),
-                "pdfCompressorHandler", UserOptions.getInstance().isPdfCompressorHandler(),
-                "uploadHandler", UserOptions.getInstance().isUploadHandler()
-        ));
+
+        // LinkedHashMap preserves insertion order, so handlers are registered as
+        // observers in this exact order: list/csv, then download, then compress, then upload.
+        var handlerOptions = new LinkedHashMap<String, Boolean>();
+        handlerOptions.put("listHandler", UserOptions.getInstance().isListHandler());
+        handlerOptions.put("csvHandler", UserOptions.getInstance().isCsvHandler());
+        handlerOptions.put("downloadHandler", UserOptions.getInstance().isDownloadHandler());
+        handlerOptions.put("videoCompressorHandler", UserOptions.getInstance().isVideoCompressorHandler());
+        handlerOptions.put("imageCompressorHandler", UserOptions.getInstance().isImageCompressorHandler());
+        handlerOptions.put("pdfCompressorHandler", UserOptions.getInstance().isPdfCompressorHandler());
+        handlerOptions.put("uploadHandler", UserOptions.getInstance().isUploadHandler());
+        handlerFactory.createCloudClientHandlers(cloudClient, handlerOptions);
 
         cloudClient.runFiles();
         return 0;
