@@ -61,4 +61,30 @@ class FileExtensionFixerTest {
                 FileExtensionFixer.extractFileExtensionFromMimeType("")
         );
     }
+
+    @Test
+    void testForceExtensionFromMimeType_ReplacesMismatchedExtension() {
+        // Arrange
+        var currentFileName = "clip.mp4";
+        var mimeType = "image/jpeg";
+
+        // Act
+        var fixedFileName = FileExtensionFixer.forceExtensionFromMimeType(currentFileName, mimeType);
+
+        // Assert
+        assertEquals("clip.jpeg", fixedFileName, "The extension should be replaced to match the real mime type.");
+    }
+
+    @Test
+    void testForceExtensionFromMimeType_AddsExtensionWhenMissing() {
+        // Arrange
+        var currentFileName = "IMG_1234";
+        var mimeType = "video/mp4";
+
+        // Act
+        var fixedFileName = FileExtensionFixer.forceExtensionFromMimeType(currentFileName, mimeType);
+
+        // Assert
+        assertEquals("IMG_1234.mp4", fixedFileName, "The extension should be appended when the name has none.");
+    }
 }

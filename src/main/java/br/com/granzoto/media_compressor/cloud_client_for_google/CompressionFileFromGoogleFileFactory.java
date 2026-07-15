@@ -22,8 +22,9 @@ public class CompressionFileFromGoogleFileFactory {
         var parentFolderId = googleFile.getParents() != null ? googleFile.getParents().getFirst() : null;
         var folderPath = FolderPathResolver.resolveFolderPath(parentFolderId, folderPaths);
         var mimeSuperType = MimeSuperTypeExtractor.extractMimeSuperType(googleFile.getMimeType());
-        var inputFile = FileFactory.createInputFile(googleFile, folderPath);
-        var outputFile = FileFactory.createOutputFile(googleFile, folderPath);
+        var localFileName = FileExtensionFixer.forceExtensionFromMimeType(fileName, googleFile.getMimeType());
+        var inputFile = FileFactory.createInputFile(googleFile.getId(), localFileName, folderPath);
+        var outputFile = FileFactory.createOutputFile(googleFile.getId(), localFileName, folderPath);
         return new CompressionFile(googleFile.getId(), fileName, size, folderPath, googleFile.getMimeType(), mimeSuperType,
                 inputFile, outputFile);
     }

@@ -26,6 +26,20 @@ public class FileExtensionFixer {
         return currentFileName;
     }
 
+    /**
+     * Google Drive's {@code name} field is just a display label: it can carry an extension that
+     * doesn't match the file's real {@code mimeType} (e.g. two unrelated files sharing a name, or
+     * a name backfilled from a missing extension elsewhere). ffmpeg picks its output container
+     * purely from the output filename's extension, so local (on-disk) paths must always carry the
+     * extension that matches the actual {@code mimeType}, regardless of what {@code currentFileName}
+     * says, to avoid silently muxing content into the wrong container.
+     *
+     * @return {@code currentFileName} with its extension replaced by one derived from {@code mimeType}
+     **/
+    public static String forceExtensionFromMimeType(String currentFileName, String mimeType) {
+        return FilenameUtils.removeExtension(currentFileName) + "." + extractFileExtensionFromMimeType(mimeType);
+    }
+
     static String extractFileExtensionFromMimeType(String mimeType){
         if (Strings.isNullOrEmpty(mimeType)){
             throw new IllegalArgumentException("MimeType required");
