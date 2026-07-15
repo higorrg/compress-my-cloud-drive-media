@@ -2,6 +2,7 @@ package br.com.granzoto.media_compressor.main;
 
 import br.com.granzoto.media_compressor.cloud_client.CloudClient;
 import br.com.granzoto.media_compressor.cloud_client_observer_handler.*;
+import br.com.granzoto.media_compressor.model.UserOptions;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,6 +36,8 @@ public class HandlerFactory {
         handlerCreators.put("imageCompressorHandler", client -> client.addHandler(new ImageCompressorHandler()));
         handlerCreators.put("pdfCompressorHandler", client -> client.addHandler(new PdfCompressorHandler()));
         handlerCreators.put("uploadHandler", client -> client.addHandler(new UploadHandler()));
+        handlerCreators.put("restoreCorruptedImageMimeTypeHandler", client -> client.addHandler(
+                new RestoreCorruptedImageMimeTypeHandler(!UserOptions.getInstance().isApplyRestore())));
     }
 
     /**

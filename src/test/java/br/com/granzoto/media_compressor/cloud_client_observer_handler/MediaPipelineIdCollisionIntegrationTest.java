@@ -176,5 +176,10 @@ class MediaPipelineIdCollisionIntegrationTest {
                 throw new CloudClientUploadException("Failed reading compressed test file", e);
             }
         }
+
+        @Override
+        public boolean restoreOriginalRevision(CompressionFile compressionFile, String expectedMimeSuperType, boolean dryRun) {
+            throw new UnsupportedOperationException("Not exercised by this test");
+        }
     }
 }
