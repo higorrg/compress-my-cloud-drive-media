@@ -39,6 +39,7 @@ public class Main {
         handlerOptions.put("imageCompressorHandler", UserOptions.getInstance().isImageCompressorHandler());
         handlerOptions.put("pdfCompressorHandler", UserOptions.getInstance().isPdfCompressorHandler());
         handlerOptions.put("uploadHandler", UserOptions.getInstance().isUploadHandler());
+        handlerOptions.put("restoreCorruptedImageMimeTypeHandler", UserOptions.getInstance().isRestoreCorruptedImageMimeTypeHandler());
         handlerFactory.createCloudClientHandlers(cloudClient, handlerOptions);
 
         cloudClient.runFiles();

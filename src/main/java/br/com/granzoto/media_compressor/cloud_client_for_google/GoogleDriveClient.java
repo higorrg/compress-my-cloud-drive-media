@@ -3,27 +3,33 @@ package br.com.granzoto.media_compressor.cloud_client_for_google;
 import br.com.granzoto.media_compressor.cloud_client.AbstractCloudClient;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientDownloadException;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientListFilesException;
+import br.com.granzoto.media_compressor.cloud_client.CloudClientRestoreException;
 import br.com.granzoto.media_compressor.cloud_client.CloudClientUploadException;
 import br.com.granzoto.media_compressor.model.CompressionFile;
 import br.com.granzoto.media_compressor.model.FolderInfo;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
+import com.google.api.services.drive.model.Revision;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class GoogleDriveClient extends AbstractCloudClient {
 
@@ -125,6 +131,60 @@ public class GoogleDriveClient extends AbstractCloudClient {
             LOGGER.info("Upload successfully finished");
         } catch (IOException e) {
             throw new CloudClientUploadException("Upload to Google Drive failed", e);
+        }
+    }
+
+    /**
+     * Google Drive keeps a limited revision history per file (by default, 30 days or the last
+     * 100 revisions, whichever is reached first, unless a revision was pinned with "keep
+     * forever"), so a matching revision isn't guaranteed to still exist.
+     */
+    @Override
+    public boolean restoreOriginalRevision(CompressionFile compressionFile, String expectedMimeSuperType, boolean dryRun)
+            throws CloudClientRestoreException {
+        try {
+            var revisionList = this.drive.revisions().list(compressionFile.id())
+                    .setFields("revisions(id, mimeType, modifiedTime, size)")
+                    .execute();
+            List<Revision> revisions = revisionList.getRevisions();
+            if (revisions == null) {
+                LOGGER.warn("No revision history available for {} ({})", compressionFile.name(), compressionFile.id());
+                return false;
+            }
+
+            String expectedMimePrefix = expectedMimeSuperType + "/";
+            Optional<Revision> matchingRevision = revisions.stream()
+                    .filter(revision -> revision.getMimeType() != null && revision.getMimeType().startsWith(expectedMimePrefix))
+                    .min(Comparator.comparing(revision -> revision.getModifiedTime().getValue()));
+
+            if (matchingRevision.isEmpty()) {
+                LOGGER.warn("No {} revision found for {} ({}); current mimeType is {}",
+                        expectedMimeSuperType, compressionFile.name(), compressionFile.id(), compressionFile.mimeType());
+                return false;
+            }
+
+            Revision revision = matchingRevision.get();
+            if (dryRun) {
+                LOGGER.info("[DRY-RUN] Would restore {} ({}) from revision {} (mimeType={}, modifiedTime={})",
+                        compressionFile.name(), compressionFile.id(), revision.getId(), revision.getMimeType(), revision.getModifiedTime());
+                return true;
+            }
+
+            try (var revisionContent = new ByteArrayOutputStream()) {
+                this.drive.revisions().get(compressionFile.id(), revision.getId()).executeMediaAndDownloadTo(revisionContent);
+
+                var googleFile = new com.google.api.services.drive.model.File();
+                googleFile.setMimeType(revision.getMimeType());
+                var mediaContent = new ByteArrayContent(revision.getMimeType(), revisionContent.toByteArray());
+                this.drive.files().update(compressionFile.id(), googleFile, mediaContent)
+                        .setFields("id, name, mimeType")
+                        .execute();
+                LOGGER.info("Restored {} ({}) from revision {} (mimeType={})",
+                        compressionFile.name(), compressionFile.id(), revision.getId(), revision.getMimeType());
+                return true;
+            }
+        } catch (IOException e) {
+            throw new CloudClientRestoreException("Failed to restore original revision for " + compressionFile.id(), e);
         }
     }
 

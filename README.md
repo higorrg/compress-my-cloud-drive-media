@@ -90,3 +90,24 @@ or all of them, like the following command:
 ```bash
 java -jar cloud-drive-compressor-1.0.0-runner.jar --download --download-folder=~/Downloads --video --image --pdf --cloud-drive=google
 ```
+
+### Restoring Images Corrupted With a Video Mime-Type
+
+Older versions of this tool had a bug where an image could end up with its content and
+`mimeType` overwritten by an unrelated file (see the project history for details), leaving the
+image's Drive entry named like an image (e.g. `photo.jpg`) but reporting `mimeType: video/mp4`.
+
+If your Drive has files like that, you can try to recover the original content from Google
+Drive's revision history:
+
+```bash
+# Dry-run: only reports which files have a restorable image revision, changes nothing.
+java -jar cloud-drive-compressor-1.0.0-runner.jar --restore-corrupted-image-mimetype --cloud-drive=google
+
+# Actually restores the earliest image/* revision found for each affected file.
+java -jar cloud-drive-compressor-1.0.0-runner.jar --restore-corrupted-image-mimetype --apply-restore --cloud-drive=google
+```
+
+This only helps if Drive still has an `image/*` revision in that file's history — Drive keeps a
+limited revision history (by default 30 days or the last 100 revisions), so very old corruption
+may not be recoverable this way.

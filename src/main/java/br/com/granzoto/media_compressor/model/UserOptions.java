@@ -33,6 +33,16 @@ public class UserOptions {
     @CommandLine.Option(names = "--upload", description = "Enable the UploadHandler.")
     private boolean uploadHandler;
 
+    @CommandLine.Option(names = "--restore-corrupted-image-mimetype",
+            description = "Detect files named like images (by extension) whose current mimeType is video/*, "
+                    + "and restore the earliest image/* revision found in Drive's revision history. "
+                    + "Defaults to a dry-run (only reports what would be restored); pass --apply-restore to actually change files.")
+    private boolean restoreCorruptedImageMimeTypeHandler;
+
+    @CommandLine.Option(names = "--apply-restore",
+            description = "Used together with --restore-corrupted-image-mimetype to actually perform the restore, instead of only reporting it.")
+    private boolean applyRestore;
+
     @CommandLine.Option(names = "--cloud-drive", description = "Connect to cloud drive. Options are: 'Google'", required = true)
     private String cloudDriveName;
 
@@ -70,6 +80,14 @@ public class UserOptions {
 
     public boolean isUploadHandler() {
         return uploadHandler;
+    }
+
+    public boolean isRestoreCorruptedImageMimeTypeHandler() {
+        return restoreCorruptedImageMimeTypeHandler;
+    }
+
+    public boolean isApplyRestore() {
+        return applyRestore;
     }
 
     public String getCloudDriveName() {
