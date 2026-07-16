@@ -30,8 +30,7 @@ the application.
 
 There are two ways to run this project:
 
-- **[Docker](#running-with-docker)** — if you don't have Java installed (or don't want to), this
-  is the easiest path: the only requirement is Docker itself, everything else (JDK, Maven, ffmpeg,
+- **[Docker](#running-with-docker)** — if you don't have Java installed (or don't want to), the only requirement is Docker itself, everything else (JDK, Maven, ffmpeg,
   Ghostscript) is built into the image. Skip straight to the
   [Running with Docker](#running-with-docker) section below.
 - **Native**, described in this section — build and run directly on your machine with a local
