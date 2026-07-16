@@ -1,0 +1,9 @@
+target
+tokens
+logs
+*.log
+*.csv
+.git
+.idea
+.vscode
+diagram

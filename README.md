@@ -28,19 +28,25 @@ the application.
 
 ## Prerequisites
 
-Before running (or building) the application, make sure the following are installed and on your
-`PATH`:
+There are two ways to run this project:
 
-- **JDK 21**
-- **[ffmpeg](https://ffmpeg.org/)** — used to compress video (`--video`) and image (`--image`)
-  files.
-- **[Ghostscript](https://www.ghostscript.com/)** (`gs`) — used to compress PDF files (`--pdf`).
+- **[Docker](#running-with-docker)** — if you don't have Java installed (or don't want to), this
+  is the easiest path: the only requirement is Docker itself, everything else (JDK, Maven, ffmpeg,
+  Ghostscript) is built into the image. Skip straight to the
+  [Running with Docker](#running-with-docker) section below.
+- **Native**, described in this section — build and run directly on your machine with a local
+  JDK/Maven install. Requires the following to be installed and on your `PATH`:
 
-On Debian/Ubuntu, both can be installed with:
+  - **JDK 21**
+  - **[ffmpeg](https://ffmpeg.org/)** — used to compress video (`--video`) and image (`--image`)
+    files.
+  - **[Ghostscript](https://www.ghostscript.com/)** (`gs`) — used to compress PDF files (`--pdf`).
 
-```bash
-sudo apt-get update && sudo apt-get install -y ffmpeg ghostscript
-```
+  On Debian/Ubuntu, both can be installed with:
+
+  ```bash
+  sudo apt-get update && sudo apt-get install -y ffmpeg ghostscript
+  ```
 
 ## Google Drive Setup
 
@@ -70,6 +76,89 @@ Client`.
    next to where you run the jar, so future executions won't ask you to sign in again.
    * If you ever change the requested permissions/scopes, delete the `tokens/` folder to force a
      new authorization flow.
+   * When running inside Docker there's no browser to open automatically — the container prints
+     the authorization URL to the console instead. Copy it into a browser on your host machine; see
+     [Running with Docker](#running-with-docker) below for the port/volume setup this requires.
+
+## Running with Docker
+
+This is the recommended path if you don't have Java, Maven, ffmpeg or Ghostscript installed — the
+`Dockerfile` in this repo builds an image with all of them bundled, so Docker is the only thing you
+need on your machine.
+
+### 1. Install Docker
+
+Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac/Windows) or
+[Docker Engine](https://docs.docker.com/engine/install/) (Linux), then confirm it works:
+
+```bash
+docker --version
+```
+
+### 2. Get the source and build the image
+
+```bash
+git clone https://github.com/higorrg/compress-my-cloud-drive-media.git
+cd compress-my-cloud-drive-media
+docker build -t compress-my-cloud-drive-media .
+```
+
+This runs a full Maven build inside a container (no local JDK/Maven needed) and produces a final
+image that also has `ffmpeg` and `gs` installed. It only needs to be rebuilt when the source code
+changes.
+
+### 3. Set up Google Drive credentials
+
+Follow the [Google Drive Setup](#google-drive-setup) steps above to create `client_secret.json` on
+your **host** machine at `~/credentials/client_secret.json` — the container doesn't create Google
+Cloud credentials for you, it just needs to read that file, which is mounted in below.
+
+### 4. Create a local data folder
+
+The application writes its OAuth token cache (`tokens/`), the CSV export, and any downloaded/
+compressed media relative to its working directory. Create a folder on your host to persist all of
+that across container runs:
+
+```bash
+mkdir -p ~/compress-my-cloud-drive-media-data
+```
+
+### 5. Run the container
+
+Every command in [How to Use](#how-to-use) below works the same with Docker — just replace
+`java -jar cloud-drive-compressor-1.0.0-runner.jar` with:
+
+```bash
+docker run --rm -it \
+  -p 8888:8888 \
+  -v ~/credentials/client_secret.json:/root/credentials/client_secret.json:ro \
+  -v ~/compress-my-cloud-drive-media-data:/data \
+  compress-my-cloud-drive-media
+```
+
+followed by the same flags (e.g. `--list --cloud-drive=google`). For example, listing files becomes:
+
+```bash
+docker run --rm -it \
+  -p 8888:8888 \
+  -v ~/credentials/client_secret.json:/root/credentials/client_secret.json:ro \
+  -v ~/compress-my-cloud-drive-media-data:/data \
+  compress-my-cloud-drive-media \
+  --list --cloud-drive=google
+```
+
+What each flag does:
+
+- `-p 8888:8888` — exposes the local OAuth redirect server so the sign-in flow (step 6 of Google
+  Drive Setup) can complete from your host browser.
+- `-v ~/credentials/client_secret.json:/root/credentials/client_secret.json:ro` — mounts your OAuth
+  client secret read-only; the container runs as root, so its home directory is `/root`.
+- `-v ~/compress-my-cloud-drive-media-data:/data` — mounts your data folder as the container's
+  working directory, so `tokens/`, `google-drive-files.csv` and any downloaded files land there and
+  survive after the container exits.
+
+If you use `--download`, point `--download-folder` inside that mounted folder so the downloaded and
+compressed files end up on your host too, e.g. `--download-folder=/data/downloads`.
 
 ## How to Use
 
