@@ -12,15 +12,29 @@ import static java.lang.System.out;
 public class Main {
 
     public static void main(String... args) throws CloudClientListFilesException {
+        CommandLine commandLine = new CommandLine(UserOptions.getInstance());
         try {
-            new CommandLine(UserOptions.getInstance()).parseArgs(args);
-            int exitCode = new Main().run();
-            System.exit(exitCode);
+            commandLine.parseArgs(args);
         } catch (CommandLine.ParameterException e) {
             System.err.println(e.getMessage());
             e.getCommandLine().usage(out, CommandLine.Help.Ansi.ON);
             System.exit(2);
+            return;
         }
+
+        if (commandLine.isUsageHelpRequested()) {
+            commandLine.usage(out, CommandLine.Help.Ansi.ON);
+            System.exit(0);
+            return;
+        }
+        if (commandLine.isVersionHelpRequested()) {
+            commandLine.printVersionHelp(out, CommandLine.Help.Ansi.ON);
+            System.exit(0);
+            return;
+        }
+
+        int exitCode = new Main().run();
+        System.exit(exitCode);
     }
 
     public Integer run() throws CloudClientListFilesException {
