@@ -26,6 +26,22 @@ the application.
 
 ![compress-my-cloud-drive-media-Component.drawio.png](diagram/compress-my-cloud-drive-media-Component.drawio.png)
 
+## Prerequisites
+
+Before running (or building) the application, make sure the following are installed and on your
+`PATH`:
+
+- **JDK 21**
+- **[ffmpeg](https://ffmpeg.org/)** — used to compress video (`--video`) and image (`--image`)
+  files.
+- **[Ghostscript](https://www.ghostscript.com/)** (`gs`) — used to compress PDF files (`--pdf`).
+
+On Debian/Ubuntu, both can be installed with:
+
+```bash
+sudo apt-get update && sudo apt-get install -y ffmpeg ghostscript
+```
+
 ## Google Drive Setup
 
 Before running the application with `--cloud-drive=google`, you need to create your own OAuth
