@@ -27,6 +27,8 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+    - name: Install ffmpeg and ghostscript
+      run: sudo apt-get update && sudo apt-get install -y ffmpeg ghostscript
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
