@@ -21,6 +21,8 @@ jobs:
           cache: maven
       - name: Install ffmpeg and ghostscript
         run: sudo apt-get update && sudo apt-get install -y ffmpeg ghostscript
+      - name: Set version from tag
+        run: mvn -B versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false --file pom.xml
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       - name: Create GitHub Release
