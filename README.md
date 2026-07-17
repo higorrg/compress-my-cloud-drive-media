@@ -20,11 +20,63 @@ the application.
 
 ## System Context Diagram
 
-![compress-my-cloud-drive-media-System Context.drawio.png](diagram/compress-my-cloud-drive-media-System%20Context.drawio.png)
+```mermaid
+graph LR
+    User["<b>Cloud User</b><br/>[Person]<br/><br/>A cloud drive customer, wanting to shrink down the size of his files."]
+    System["<b>Compress-My-Cloud-Drive-Media</b><br/>[Software System]<br/><br/>Lists, downloads, compresses and re-uploads cloud drive media files."]
+    CloudDrive["<b>Cloud Drive</b><br/>[Software System]<br/><br/>Cloud drive provider like Google Drive, Microsoft OneDrive and Dropbox."]
+
+    User -->|Manage media files| CloudDrive
+    User -->|Compress cloud drive media files| System
+    System -->|"List, Download and Upload [HTTPS]"| CloudDrive
+
+    classDef person fill:#0b3d6e,stroke:#062843,color:#fff
+    classDef internal fill:#1168bd,stroke:#0b4884,color:#fff
+    classDef external fill:#8a7ca8,stroke:#6b5d8a,color:#fff
+    class User person
+    class System internal
+    class CloudDrive external
+```
 
 ## Component Diagram
 
-![compress-my-cloud-drive-media-Component.drawio.png](diagram/compress-my-cloud-drive-media-Component.drawio.png)
+```mermaid
+graph TD
+    User["<b>Cloud User</b><br/>[Person]<br/><br/>A cloud drive customer, wanting to shrink down the size of his files."]
+    CloudDrive["<b>Cloud Drive</b><br/>[Software System]<br/><br/>Cloud drive provider like Google Drive, Microsoft OneDrive and Dropbox."]
+
+    subgraph Container["Runnable Jar for Compress-My-Cloud-Drive-Media [Container]"]
+        Main["<b>Main</b><br/>[Component: Java]"]
+        CloudClientFactory["<b>CloudClientFactory</b><br/>[Component: Java]<br/><br/>Create a cloud client implementation like Google Drive, OneDrive or Dropbox."]
+        HandlerFactory["<b>HandlerFactory</b><br/>[Component: Java]<br/><br/>Create handlers according to user goals"]
+        CloudClient["<b>Cloud Client</b><br/>[Component: Java Interface]<br/><br/>Represents the cloud drive that the user wants to compress his media files."]
+        CloudClientHandler["<b>Cloud Client Handler</b><br/>[Component: Java Interface]<br/><br/>Represents a handler that wants to register itself on the CloudClient."]
+        StartObserver["<b>Start Event Observer</b><br/>[Component: Java Interface]<br/><br/>Observe the start of the process of listing files. Kind of a header section."]
+        ItemObserver["<b>Item Event Observer</b><br/>[Component: Java Interface]<br/><br/>Observe file by file of the process of listing files."]
+        EndObserver["<b>End Event Observer</b><br/>[Component: Java Interface]<br/><br/>Observe the end of the process of listing files. Kind of a footer section."]
+    end
+
+    User -->|Compress media files| Main
+    User -->|Manage media files| CloudDrive
+
+    Main -->|getCloudClient| CloudClientFactory
+    Main -->|createCloudClientHandlers| HandlerFactory
+    Main -->|"runFiles - The process of listing files"| CloudClient
+
+    CloudClient -->|"List, Download and Upload files [HTTPS]"| CloudDrive
+    CloudClient -->|Notify Observer| StartObserver
+    CloudClient -->|Notify Observer| ItemObserver
+    CloudClient -->|Notify Observer| EndObserver
+
+    CloudClientHandler -->|Register itself as observer of any event| CloudClient
+
+    classDef person fill:#0b3d6e,stroke:#062843,color:#fff
+    classDef internal fill:#5aa9e6,stroke:#2c72b0,color:#fff
+    classDef external fill:#8a7ca8,stroke:#6b5d8a,color:#fff
+    class User person
+    class CloudDrive external
+    class Main,CloudClientFactory,HandlerFactory,CloudClient,CloudClientHandler,StartObserver,ItemObserver,EndObserver internal
+```
 
 ## Prerequisites
 
